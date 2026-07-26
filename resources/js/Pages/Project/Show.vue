@@ -1,0 +1,495 @@
+<script setup>
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import { Head, Link, useForm, router } from '@inertiajs/vue3';
+import { ref, computed, watch, onUnmounted } from 'vue';
+
+const props = defineProps({
+    project: Object,
+});
+
+const currentDraftIndex = ref(0);
+const selectedDraft1 = ref('');
+const selectedDraft2 = ref('');
+const showUploadModal = ref(false);
+const videoPlayer = ref(null);
+
+const activeDraft = computed(() => {
+    if (!props.project.drafts || props.project.drafts.length === 0) return null;
+    return props.project.drafts[currentDraftIndex.value];
+});
+
+// Auto-polling for processing drafts
+let pollInterval = null;
+
+const startPolling = () => {
+    if (pollInterval) return;
+    pollInterval = setInterval(() => {
+        router.reload({
+            only: ['project'],
+            onSuccess: () => {
+                if (activeDraft.value && activeDraft.value.status !== 'processing') {
+                    stopPolling();
+                }
+            }
+        });
+    }, 3000);
+};
+
+const stopPolling = () => {
+    if (pollInterval) {
+        clearInterval(pollInterval);
+        pollInterval = null;
+    }
+};
+watch(activeDraft, (newDraft) => {
+    if (newDraft && newDraft.status === 'processing') {
+        startPolling();
+    } else {
+        stopPolling();
+    }
+}, { immediate: true });
+
+const isVertical = ref(false);
+
+const onVideoLoaded = (e) => {
+    const video = e.target;
+    isVertical.value = video.videoHeight > video.videoWidth;
+    console.log(`[VideoLoaded] Dimensions: ${video.videoWidth}x${video.videoHeight}, isVertical: ${isVertical.value}`);
+};
+
+watch(currentDraftIndex, () => {
+    isVertical.value = false;
+});
+
+onUnmounted(() => {
+    stopPolling();
+});
+
+// Format timestamp: seconds to MM:SS
+const formatTime = (seconds) => {
+    if (seconds === null || seconds === undefined) return '';
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+};
+
+// Jump to time in player
+const jumpToTime = (seconds) => {
+    if (videoPlayer.value && seconds !== null) {
+        videoPlayer.value.currentTime = seconds;
+        videoPlayer.value.play();
+    }
+};
+
+const uploadForm = useForm({
+    video: null,
+});
+
+const fileSizeMB = computed(() => {
+    if (!uploadForm.video) return 0;
+    return Math.round(uploadForm.video.size / (1024 * 1024));
+});
+
+const uploadProgress = ref(0);
+
+const uploadDraft = () => {
+    uploadForm.post(route('drafts.store', props.project.id), {
+        onStart: () => {
+            console.log('[ProjectView] Starting video draft upload...', uploadForm.video ? { name: uploadForm.video.name, size: uploadForm.video.size } : 'No file');
+        },
+        onSuccess: () => {
+            console.log('[ProjectView] Video draft uploaded successfully!');
+            showUploadModal.value = false;
+            uploadForm.reset();
+            uploadProgress.value = 0;
+        },
+        onError: (errors) => {
+            console.error('[ProjectView] Video draft upload failed. Validation errors:', errors);
+        },
+        forceFormData: true,
+    });
+};
+
+const handleFileSelect = (e) => {
+    uploadForm.video = e.target.files[0];
+    console.log('[ProjectView] Selected file for upload:', uploadForm.video ? { name: uploadForm.video.name, size: uploadForm.video.size } : null);
+};
+
+// Comment Resolution Form
+const resolveComment = (commentId, isResolved) => {
+    const form = useForm({ is_resolved: isResolved });
+    form.post(route('comments.resolve', commentId), {
+        preserveScroll: true,
+        onStart: () => {
+            console.log(`[ProjectView] Sending resolution change for comment ID ${commentId} (resolved: ${isResolved})...`);
+        },
+        onSuccess: () => {
+            console.log(`[ProjectView] Successfully updated resolution for comment ID ${commentId}!`);
+        },
+        onError: (errors) => {
+            console.error(`[ProjectView] Failed to update resolution for comment ID ${commentId}:`, errors);
+        },
+    });
+};
+
+// Comment Rejection Form
+const showRejectModal = ref(false);
+const rejectingCommentId = ref(null);
+const rejectionForm = useForm({
+    rejection_reason: '',
+    is_rejected: true,
+});
+
+const promptRejection = (comment) => {
+    if (comment.is_rejected) {
+        rejectionForm.is_rejected = false;
+        rejectionForm.rejection_reason = '';
+        rejectionForm.post(route('comments.reject', comment.id), {
+            preserveScroll: true,
+            onSuccess: () => {
+                console.log('[ProjectView] Rejection cleared.');
+            }
+        });
+    } else {
+        rejectingCommentId.value = comment.id;
+        rejectionForm.is_rejected = true;
+        rejectionForm.rejection_reason = '';
+        showRejectModal.value = true;
+    }
+};
+
+const submitRejection = () => {
+    rejectionForm.post(route('comments.reject', rejectingCommentId.value), {
+        preserveScroll: true,
+        onSuccess: () => {
+            showRejectModal.value = false;
+            rejectionForm.reset();
+            console.log('[ProjectView] Comment rejected successfully.');
+        }
+    });
+};
+
+// Copy Share Link
+const copied = ref(false);
+const shareUrl = computed(() => {
+    return `${window.location.origin}/review/${props.project.share_token}`;
+});
+
+const copyShareLink = () => {
+    navigator.clipboard.writeText(shareUrl.value);
+    copied.value = true;
+    setTimeout(() => copied.value = false, 2000);
+};
+
+const archiveProject = () => {
+    if (confirm('Are you sure you want to acknowledge and archive this project? This will lock client approvals and move it to archives.')) {
+        router.post(route('projects.archive', props.project.id), {
+            onSuccess: () => {
+                console.log('[ProjectView] Project archived and locked successfully!');
+            }
+        });
+    }
+};
+
+const deleteProject = () => {
+    if (confirm('Are you sure you want to permanently delete/trash this project? This cannot be undone.')) {
+        router.delete(route('projects.destroy', props.project.id), {
+            onSuccess: () => {
+                console.log('[ProjectView] Project deleted successfully.');
+            }
+        });
+    }
+};
+</script>
+
+<template>
+    <Head :title="project.name" />
+
+    <AuthenticatedLayout>
+        <template #header>
+            <div class="flex justify-between items-center flex-wrap gap-4">
+                <div>
+                    <div class="flex items-center gap-3">
+                        <h2 class="text-2xl font-bold text-gray-100">{{ project.name }}</h2>
+                        <span :class="`px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider ${
+                            project.status === 'approved' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                        }`">
+                            {{ project.status }}
+                        </span>
+                    </div>
+                    <p class="text-gray-400 text-sm mt-1">{{ project.description || 'No description' }}</p>
+                </div>
+
+                <div class="flex gap-3">
+                    <a v-if="project.status === 'approved' || project.status === 'archived'" :href="route('projects.download-record', project.id)" target="_blank" class="btn-secondary flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                        Download Approval PDF
+                    </a>
+
+                    <!-- Handshake Archive Button -->
+                    <button v-if="project.status === 'approved'" @click="archiveProject" class="btn-primary bg-gradient-to-r from-emerald-500 to-teal-600 shadow-emerald-500/30 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Acknowledge & Archive
+                    </button>
+
+                    <!-- Trash Button for archived project -->
+                    <button v-if="project.status === 'archived'" @click="deleteProject" class="btn-secondary border-rose-500/20 text-rose-400 hover:bg-rose-500/10 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        Trash Project
+                    </button>
+                    
+                    <button v-if="project.status !== 'archived'" @click="showUploadModal = true" class="btn-primary flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L6.707 8.121a1 1 0 01-1.414-1.414z" clip-rule="evenodd" />
+                        </svg>
+                        Upload Draft
+                    </button>
+                </div>
+            </div>
+        </template>
+
+        <div class="py-12">
+            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+                <!-- Client Access Link Box -->
+                <div class="glass-card p-6 flex justify-between items-center flex-wrap gap-4">
+                    <div class="flex items-center gap-3">
+                        <div class="p-3 bg-indigo-500/10 rounded-xl text-indigo-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-gray-200">Secure Client Access</h4>
+                            <p class="text-xs text-gray-400">Send this magic URL to client <span class="text-indigo-300 font-semibold">{{ project.client?.name }}</span> to review and approve drafts.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 bg-slate-950 p-1.5 rounded-xl border border-white/5 w-full md:w-auto">
+                        <span class="text-xs text-gray-400 px-3 truncate max-w-md">{{ shareUrl }}</span>
+                        <button @click="copyShareLink" class="btn-primary py-1.5 px-4 text-xs">
+                            {{ copied ? 'Copied!' : 'Copy Link' }}
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Split Layout: Video & Revisions -->
+                <div :class="isVertical ? 'grid grid-cols-1 lg:grid-cols-2 gap-6' : 'grid grid-cols-1 lg:grid-cols-3 gap-6'">
+                    <!-- Left: Video & Versions -->
+                    <div :class="isVertical ? 'lg:col-span-1 space-y-6' : 'lg:col-span-2 space-y-6'">
+                        <!-- Custom Video Display -->
+                        <div class="glass-card overflow-hidden">
+                            <div v-if="activeDraft" class="bg-black max-h-[65vh] flex items-center justify-center relative aspect-auto">
+                                <video v-if="activeDraft.status === 'ready'" ref="videoPlayer" :src="activeDraft.video_url" @loadedmetadata="onVideoLoaded" controls class="max-w-full max-h-[65vh] object-contain"></video>
+                                <div v-else-if="activeDraft.status === 'processing'" class="text-center p-8 text-gray-400">
+                                    <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-indigo-500 mx-auto mb-4"></div>
+                                    <h4 class="font-semibold text-lg text-gray-200">Processing Draft v{{ activeDraft.version_number }}...</h4>
+                                    <p class="text-sm">We are running FFmpeg to transcode and extract thumbnails. Please refresh in a moment.</p>
+                                </div>
+                                <div v-else class="text-center text-red-400 p-8">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                    </svg>
+                                    <h4 class="font-semibold">Transcoding Failed</h4>
+                                    <p class="text-xs text-gray-400 mt-1">Please try uploading a different format.</p>
+                                </div>
+                            </div>
+                            <div v-else class="bg-slate-900 aspect-video flex flex-col items-center justify-center p-8 text-gray-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mb-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                </svg>
+                                <h4 class="font-semibold text-lg">No drafts uploaded</h4>
+                                <p class="text-sm text-gray-400 mt-1 mb-4">Upload your first draft version to get started.</p>
+                            </div>
+
+                            <div v-if="activeDraft" class="p-6 bg-slate-900/50 border-t border-white/5 flex justify-between items-center">
+                                <div>
+                                    <span class="text-xs uppercase font-semibold text-indigo-400">Current View</span>
+                                    <h4 class="text-lg font-bold text-gray-200">Draft Version {{ activeDraft.version_number }}</h4>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs text-gray-400">Select Draft:</span>
+                                    <select v-model="currentDraftIndex" class="bg-slate-950 border border-white/10 rounded-lg text-xs py-1.5 px-3 text-white focus:outline-none focus:border-indigo-500">
+                                        <option v-for="(draft, idx) in project.drafts" :key="draft.id" :value="idx">
+                                            v{{ draft.version_number }} ({{ draft.status }})
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Before and After Comparison Control -->
+                        <div v-if="project.drafts && project.drafts.length > 1" class="glass-card p-6">
+                            <h3 class="font-bold text-lg mb-4">Version Comparison</h3>
+                            <div class="flex items-center gap-4 flex-wrap">
+                                <div class="flex items-center gap-2 text-xs">
+                                    <span>Compare version:</span>
+                                    <select v-model="selectedDraft1" class="bg-slate-950 border border-white/10 rounded-lg text-xs py-1.5 px-3 text-white">
+                                        <option v-for="d in project.drafts" :key="d.id" :value="d.id">v{{ d.version_number }}</option>
+                                    </select>
+                                </div>
+                                <div class="flex items-center gap-2 text-xs">
+                                    <span>with version:</span>
+                                    <select v-model="selectedDraft2" class="bg-slate-950 border border-white/10 rounded-lg text-xs py-1.5 px-3 text-white">
+                                        <option v-for="d in project.drafts" :key="d.id" :value="d.id">v{{ d.version_number }}</option>
+                                    </select>
+                                </div>
+                                <Link :href="route('projects.compare', [project.id])" :data="{ draft1: selectedDraft1, draft2: selectedDraft2 }" class="btn-primary py-1.5 px-4 text-xs">
+                                    Compare Side-by-Side
+                                </Link>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Revision Checklist -->
+                    <div class="space-y-6">
+                        <div class="glass-card p-6 flex flex-col h-[550px]">
+                            <div class="flex justify-between items-center border-b border-white/5 pb-4 mb-4">
+                                <h3 class="font-bold text-lg">Revision Checklist</h3>
+                                <span v-if="activeDraft" class="bg-indigo-500/10 text-indigo-400 text-xs px-2.5 py-0.5 rounded-full font-semibold">
+                                    v{{ activeDraft.version_number }}
+                                </span>
+                            </div>
+
+                            <div v-if="!activeDraft" class="text-center text-gray-500 my-auto">
+                                No drafts uploaded.
+                            </div>
+                            
+                            <div v-else-if="activeDraft.comments.length === 0" class="text-center text-gray-500 my-auto">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-2 opacity-35" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                                </svg>
+                                <p class="text-sm">Checklist is clean!</p>
+                                <p class="text-xs text-gray-400 mt-1">Client hasn't left feedback yet.</p>
+                            </div>
+
+                            <div v-else class="flex-1 overflow-y-auto space-y-4 pr-2">
+                                <div v-for="comment in activeDraft.comments" :key="comment.id" :class="`p-4 rounded-xl border transition-all duration-200 ${
+                                    comment.is_resolved ? 'bg-slate-900/30 border-emerald-500/10 opacity-70' : comment.is_rejected ? 'bg-slate-900/40 border-rose-500/10' : 'bg-slate-900/60 border-white/5'
+                                }`">
+                                    <div class="flex items-start justify-between gap-3">
+                                        <div class="flex-1">
+                                            <div class="flex items-center gap-2 mb-1.5">
+                                                <span v-if="comment.timestamp_seconds !== null" @click="jumpToTime(comment.timestamp_seconds)" class="bg-indigo-500/20 text-indigo-300 font-mono text-xs px-2 py-0.5 rounded cursor-pointer hover:bg-indigo-500 hover:text-white transition-all">
+                                                    {{ formatTime(comment.timestamp_seconds) }}
+                                                </span>
+                                                <span class="text-xs text-gray-400 font-bold">{{ comment.author_name }}</span>
+                                            </div>
+                                            <p class="text-sm text-gray-200 leading-relaxed">{{ comment.content }}</p>
+                                            
+                                            <!-- Decline reason banner -->
+                                            <div v-if="comment.is_rejected" class="mt-2 p-2 bg-rose-500/5 border border-rose-500/10 rounded-lg text-xs text-rose-300 flex items-start gap-1.5">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-rose-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                                                </svg>
+                                                <span><span class="font-bold text-rose-200">Declined:</span> {{ comment.rejection_reason || 'No reason provided.' }}</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="flex items-center gap-1.5">
+                                            <!-- Resolve Button -->
+                                            <button @click="resolveComment(comment.id, !comment.is_resolved)" :disabled="comment.is_rejected" :class="`p-1.5 rounded-lg border transition-all ${
+                                                comment.is_resolved ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400 hover:bg-red-500/10 hover:border-red-500/20 hover:text-red-400' : 'bg-slate-950 border-white/5 text-gray-500 hover:bg-emerald-500/10 hover:border-emerald-500/20 hover:text-emerald-400'
+                                            } ${comment.is_rejected ? 'opacity-35 cursor-not-allowed' : ''}`" :title="comment.is_resolved ? 'Mark Unresolved' : 'Mark Resolved'">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                                </svg>
+                                            </button>
+                                            
+                                            <!-- Reject Button -->
+                                            <button @click="promptRejection(comment)" :disabled="comment.is_resolved" :class="`p-1.5 rounded-lg border transition-all ${
+                                                comment.is_rejected ? 'bg-rose-500/15 border-rose-500/30 text-rose-400 hover:bg-slate-950 hover:border-white/5 hover:text-gray-500' : 'bg-slate-950 border-white/5 text-gray-500 hover:bg-rose-500/10 hover:border-rose-500/20 hover:text-rose-400'
+                                            } ${comment.is_resolved ? 'opacity-35 cursor-not-allowed' : ''}`" :title="comment.is_rejected ? 'Clear Decline' : 'Mark Not Doable'">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upload Modal -->
+        <div v-if="showUploadModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
+            <div class="glass-card max-w-md w-full p-8 relative">
+                <button @click="showUploadModal = false" class="absolute top-4 right-4 text-gray-400 hover:text-gray-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+
+                <h3 class="text-2xl font-bold mb-6 text-gray-100">Upload New Video Draft</h3>
+
+                <form @submit.prevent="uploadDraft" class="space-y-4">
+                    <div class="border-2 border-dashed border-white/10 hover:border-indigo-500/50 rounded-xl p-8 text-center cursor-pointer transition-colors relative">
+                        <input type="file" @change="handleFileSelect" class="absolute inset-0 opacity-0 cursor-pointer" accept="video/*" required />
+                        <div class="space-y-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                            </svg>
+                            <div class="text-sm text-gray-300 font-semibold">
+                                {{ uploadForm.video ? uploadForm.video.name : 'Click to upload video file' }}
+                            </div>
+                            <p class="text-xs text-gray-400">MP4, MOV, WEBM or MKV (Max 2GB)</p>
+                        </div>
+                    </div>
+
+                    <div v-if="fileSizeMB > 100" class="p-3 bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs rounded-xl flex items-center gap-2">
+                        <span>⚠️ Large file detected ({{ fileSizeMB }} MB). This upload might take a while depending on your network speed.</span>
+                    </div>
+
+                    <div v-if="uploadForm.errors.video" class="text-red-500 text-xs text-center mt-2">
+                        {{ uploadForm.errors.video }}
+                    </div>
+
+                    <div v-if="uploadForm.progress" class="w-full bg-slate-950 rounded-full h-2">
+                        <div class="bg-indigo-500 h-2 rounded-full" :style="`width: ${uploadForm.progress.percentage}%`"></div>
+                    </div>
+
+                    <div class="flex justify-end gap-3 pt-4">
+                        <button type="button" @click="showUploadModal = false" class="btn-secondary">Cancel</button>
+                        <button type="submit" class="btn-primary" :disabled="uploadForm.processing">Upload</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Rejection Modal -->
+        <div v-if="showRejectModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fade-in">
+            <div class="glass-card max-w-md w-full p-8 relative">
+                <button @click="showRejectModal = false" class="absolute top-4 right-4 text-gray-400 hover:text-gray-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+
+                <h3 class="text-xl font-bold mb-2 text-gray-100">Mark Revision as Not Doable</h3>
+                <p class="text-xs text-gray-400 mb-6">Type a short message explaining to the client why this feedback cannot be implemented.</p>
+
+                <form @submit.prevent="submitRejection" class="space-y-4">
+                    <textarea 
+                        v-model="rejectionForm.rejection_reason" 
+                        placeholder="Explain reason (e.g. constraints, timeframe)..." 
+                        rows="3" 
+                        class="w-full bg-slate-950/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500" 
+                        required
+                    ></textarea>
+
+                    <div class="flex justify-end gap-3 pt-2">
+                        <button type="button" @click="showRejectModal = false" class="btn-secondary text-xs">Cancel</button>
+                        <button type="submit" class="btn-primary text-xs bg-rose-600 hover:bg-rose-500 shadow-rose-600/20">Decline Request</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </AuthenticatedLayout>
+</template>
