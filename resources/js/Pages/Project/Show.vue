@@ -105,6 +105,14 @@ const handleFileSelect = (e) => {
     console.log('[ProjectView] Selected file for upload:', uploadFile.value ? { name: uploadFile.value.name, size: uploadFile.value.size } : null);
 };
 
+const closeSuccessModal = () => {
+    showUploadModal.value = false;
+    uploadFile.value = null;
+    uploadStatus.value = 'idle';
+    chunkProgress.value = 0;
+    router.reload();
+};
+
 const uploadDraft = async () => {
     if (!uploadFile.value || uploadStatus.value === 'uploading') return;
 
@@ -152,13 +160,6 @@ const uploadDraft = async () => {
             if (response.data.status === 'completed') {
                 chunkProgress.value = 100;
                 uploadStatus.value = 'success';
-                setTimeout(() => {
-                    showUploadModal.value = false;
-                    uploadFile.value = null;
-                    uploadStatus.value = 'idle';
-                    chunkProgress.value = 0;
-                    router.reload();
-                }, 1000);
                 return;
             }
         } catch (error) {
@@ -547,13 +548,22 @@ const deleteProject = () => {
                         </div>
                     </div>
                     
-                    <div v-else-if="uploadStatus === 'success'" class="text-center py-2 text-xs font-mono-technical text-emerald-400 font-bold">
-                        ✓ Merge completed! Finalizing draft...
+                    <div v-else-if="uploadStatus === 'success'" class="text-center py-6 space-y-4">
+                        <div class="w-12 h-12 rounded-full bg-accent/15 border border-accent/40 flex items-center justify-center mx-auto text-accent text-xl animate-bounce">
+                            ✓
+                        </div>
+                        <div>
+                            <h4 class="font-editorial text-lg font-bold text-gray-200 font-editorial">Draft Uploaded Successfully</h4>
+                            <p class="text-xs text-gray-400 mt-1 font-mono-technical uppercase tracking-wider">Merged and queued for transcoding</p>
+                        </div>
+                        <button type="button" @click="closeSuccessModal" class="btn-primary w-full py-2">
+                            Done
+                        </button>
                     </div>
 
-                    <div class="flex justify-end gap-3 pt-4">
-                        <button type="button" @click="showUploadModal = false" class="btn-secondary" :disabled="uploadStatus === 'uploading'">Cancel</button>
-                        <button type="submit" class="btn-primary" :disabled="!uploadFile || uploadStatus === 'uploading'">Upload</button>
+                    <div v-if="uploadStatus === 'idle' || uploadStatus === 'error'" class="flex justify-end gap-3 pt-4">
+                        <button type="button" @click="showUploadModal = false" class="btn-secondary">Cancel</button>
+                        <button type="submit" class="btn-primary" :disabled="!uploadFile">Upload</button>
                     </div>
                 </form>
             </div>
