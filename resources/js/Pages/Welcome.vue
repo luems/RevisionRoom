@@ -8,32 +8,32 @@ defineProps({
     auth_user: Object,
 });
 
-const activeTab = ref('sync');
+const activeFeature = ref('sync');
 </script>
 
 <template>
     <Head title="RevisionRoom — Next-Gen Video Review & Client Approval Platform" />
 
-    <div class="min-h-screen bg-[#131313] text-gray-100 font-sans selection:bg-accent selection:text-[#131313] relative overflow-hidden">
+    <div class="min-h-screen bg-[#131313] text-gray-100 font-sans selection:bg-accent selection:text-[#131313] relative overflow-x-hidden">
         
-        <!-- Ambient Glowing Background Blobs -->
-        <div class="absolute top-[-10%] left-[20%] w-[500px] h-[500px] bg-accent/10 rounded-full blur-[140px] pointer-events-none"></div>
-        <div class="absolute top-[40%] right-[-10%] w-[600px] h-[600px] bg-indigo-600/10 rounded-full blur-[160px] pointer-events-none"></div>
-        <div class="absolute bottom-[-10%] left-[30%] w-[450px] h-[450px] bg-emerald-500/10 rounded-full blur-[150px] pointer-events-none"></div>
+        <!-- Subtle Background Grid Pattern -->
+        <div class="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.05)_1px,transparent_1px)] [background-size:32px_32px] pointer-events-none"></div>
+
+        <!-- Ambient Glowing Background Orbs -->
+        <div class="absolute top-[-100px] left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-accent/10 rounded-full blur-[160px] pointer-events-none"></div>
+        <div class="absolute top-[1200px] right-[-100px] w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[160px] pointer-events-none"></div>
 
         <!-- Sticky Header Navigation -->
-        <header class="border-b border-white/5 bg-[#1c1b1b]/80 backdrop-blur-xl px-6 py-4 sticky top-0 z-50">
+        <header class="border-b border-white/5 bg-[#131313]/90 backdrop-blur-xl px-6 py-4 sticky top-0 z-50">
             <div class="max-w-7xl mx-auto flex justify-between items-center">
                 
                 <!-- Logo -->
                 <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-lg bg-accent flex items-center justify-center text-[#131313] font-black text-lg shadow-[0_0_20px_rgba(203,251,69,0.4)]">
+                    <div class="w-8 h-8 rounded-md bg-accent flex items-center justify-center text-[#131313] font-black text-base shadow-[0_0_15px_rgba(203,251,69,0.3)]">
                         R
                     </div>
-                    <div>
-                        <span class="text-xl font-editorial font-bold text-gray-100 tracking-tight">RevisionRoom</span>
-                        <span class="ml-2 text-[9px] font-mono-technical uppercase tracking-widest text-accent bg-accent/10 border border-accent/20 px-1.5 py-0.5 rounded-sm">V2.0 PRO</span>
-                    </div>
+                    <span class="text-xl font-editorial font-bold text-gray-100 tracking-tight">RevisionRoom</span>
+                    <span class="text-[9px] font-mono-technical uppercase tracking-widest text-accent bg-accent/10 border border-accent/20 px-1.5 py-0.5 rounded-sm hidden sm:inline-block">V2.0 PRO</span>
                 </div>
 
                 <!-- Navigation Links -->
@@ -41,13 +41,13 @@ const activeTab = ref('sync');
                     <a href="#features" class="hover:text-accent transition-colors">Features</a>
                     <a href="#compare" class="hover:text-accent transition-colors">Sync Player</a>
                     <a href="#workflow" class="hover:text-accent transition-colors">Workflow</a>
-                    <a href="#security" class="hover:text-accent transition-colors">Security</a>
+                    <a href="#tech" class="hover:text-accent transition-colors">Specs</a>
                 </nav>
 
                 <!-- Action Buttons -->
                 <div class="flex items-center gap-3">
                     <template v-if="auth_user">
-                        <Link :href="route('dashboard')" class="btn-primary py-2 px-5 text-xs flex items-center gap-2">
+                        <Link :href="route('dashboard')" class="btn-primary py-2 px-5 text-xs font-bold font-mono-technical uppercase tracking-wider flex items-center gap-2">
                             <span>Go to Dashboard</span>
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
@@ -55,10 +55,10 @@ const activeTab = ref('sync');
                         </Link>
                     </template>
                     <template v-else>
-                        <Link :href="route('login')" class="btn-secondary py-2 px-4 text-xs">
-                            Sign In
+                        <Link :href="route('login')" class="btn-secondary py-2 px-4 text-xs font-mono-technical uppercase tracking-wider">
+                            Log In
                         </Link>
-                        <Link v-if="canRegister" :href="route('register')" class="btn-primary py-2 px-5 text-xs">
+                        <Link v-if="canRegister" :href="route('register')" class="btn-primary py-2 px-5 text-xs font-bold font-mono-technical uppercase tracking-wider">
                             Start Free Trial
                         </Link>
                     </template>
@@ -66,279 +66,412 @@ const activeTab = ref('sync');
             </div>
         </header>
 
-        <!-- Hero Section -->
+        <!-- 1. HERO SECTION -->
         <section class="relative pt-20 pb-16 px-6 max-w-7xl mx-auto text-center space-y-8 z-10">
-            <!-- Pill Announcement Badge -->
-            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-mono-technical text-gray-300 backdrop-blur-md shadow-inner">
-                <span class="w-2 h-2 rounded-full bg-accent animate-ping"></span>
+            
+            <!-- Top Announcement Pill -->
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-mono-technical text-gray-300 hover:border-accent/40 transition-colors shadow-inner cursor-pointer">
+                <span class="w-2 h-2 rounded-full bg-accent animate-pulse"></span>
                 <span>Introducing Synchronized Dual-Player Comparison</span>
-                <span class="text-accent font-bold">New ✨</span>
+                <span class="text-accent font-bold">Explore →</span>
             </div>
 
-            <!-- Main Headline -->
-            <h1 class="text-4xl sm:text-6xl lg:text-7xl font-editorial font-bold text-gray-100 tracking-tight leading-[1.15] max-w-5xl mx-auto">
-                Frame-Accurate Video Review &<br />
-                <span class="text-accent drop-shadow-[0_0_35px_rgba(203,251,69,0.4)]">Instant Client Approvals</span>
+            <!-- Hero Headline -->
+            <h1 class="text-4xl sm:text-6xl lg:text-7xl font-editorial font-bold text-gray-100 tracking-tight leading-[1.1] max-w-5xl mx-auto">
+                Work on all your video revisions <br class="hidden sm:block" />
+                <span class="text-accent drop-shadow-[0_0_35px_rgba(203,251,69,0.3)]">in one single place.</span>
             </h1>
 
             <!-- Subtitle -->
             <p class="text-base sm:text-lg text-gray-400 max-w-2xl mx-auto font-sans leading-relaxed">
-                Eliminate endless email threads and vague feedback. Share magic review links, compare version drafts side-by-side with synchronized playback, and export legally verified PDF sign-offs.
+                Streamline video reviews, run side-by-side version comparison with frame sync, collect screenshot feedback, and get verified PDF sign-offs.
             </p>
 
-            <!-- CTA Action Buttons -->
+            <!-- CTA Buttons -->
             <div class="flex items-center justify-center gap-4 flex-wrap pt-2">
-                <Link v-if="!auth_user" :href="route('register')" class="btn-primary py-3.5 px-8 text-sm flex items-center gap-2 text-[#131313] font-bold shadow-[0_0_30px_rgba(203,251,69,0.3)] hover:scale-105 transition-transform">
-                    <span>Create Free Workspace</span>
+                <Link v-if="!auth_user" :href="route('register')" class="btn-primary py-3.5 px-8 text-sm font-bold font-mono-technical uppercase tracking-wider flex items-center gap-2 text-[#131313] shadow-[0_0_25px_rgba(203,251,69,0.3)] hover:scale-105 transition-all">
+                    <span>Start Free Trial</span>
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                 </Link>
-                <Link v-else :href="route('dashboard')" class="btn-primary py-3.5 px-8 text-sm flex items-center gap-2 text-[#131313] font-bold shadow-[0_0_30px_rgba(203,251,69,0.3)] hover:scale-105 transition-transform">
-                    <span>Open Editor Dashboard</span>
+                <Link v-else :href="route('dashboard')" class="btn-primary py-3.5 px-8 text-sm font-bold font-mono-technical uppercase tracking-wider flex items-center gap-2 text-[#131313] shadow-[0_0_25px_rgba(203,251,69,0.3)] hover:scale-105 transition-all">
+                    <span>Open Dashboard</span>
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                 </Link>
-                <a href="#features" class="btn-secondary py-3.5 px-7 text-sm flex items-center gap-2 border-white/10 hover:border-white/20">
+                <a href="#compare" class="btn-secondary py-3.5 px-7 text-sm font-mono-technical uppercase tracking-wider flex items-center gap-2 border-white/10 hover:border-white/20">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span>Explore Features</span>
+                    <span>Watch Interactive Demo</span>
                 </a>
             </div>
 
-            <!-- Feature Badges Bar -->
-            <div class="pt-8 border-t border-white/5 max-w-4xl mx-auto flex items-center justify-center gap-6 sm:gap-12 flex-wrap text-xs font-mono-technical text-gray-400 uppercase tracking-wider">
-                <div class="flex items-center gap-2">
-                    <span class="text-accent font-bold">⚡</span> FFmpeg Transcoding
-                </div>
-                <div class="flex items-center gap-2">
-                    <span class="text-emerald-400 font-bold">🎞️</span> Frame-Exact Timestamps
-                </div>
-                <div class="flex items-center gap-2">
-                    <span class="text-indigo-400 font-bold">🔄</span> Dual Sync Comparison
-                </div>
-                <div class="flex items-center gap-2">
-                    <span class="text-sky-400 font-bold">📄</span> PDF Audit Certificates
-                </div>
-            </div>
-        </section>
-
-        <!-- Interactive Mockup Showcase Section -->
-        <section class="py-12 px-6 max-w-7xl mx-auto relative z-10">
-            <div class="glass-card p-3 sm:p-6 bg-[#1a1a1a]/60 border border-white/10 rounded-2xl shadow-2xl overflow-hidden group">
+            <!-- Hero Product Showcase Mockup with Floating Tool Widgets -->
+            <div class="pt-8 relative max-w-6xl mx-auto">
                 
-                <!-- Mockup Header Bar -->
-                <div class="flex items-center justify-between px-4 py-3 bg-[#131313] rounded-xl border border-white/5 mb-4">
-                    <div class="flex items-center gap-2">
-                        <div class="w-3 h-3 rounded-full bg-rose-500/80"></div>
-                        <div class="w-3 h-3 rounded-full bg-amber-500/80"></div>
-                        <div class="w-3 h-3 rounded-full bg-emerald-500/80"></div>
-                        <span class="ml-3 text-xs font-mono-technical text-gray-400 truncate max-w-[200px]">RevisionRoom // Project: Commercial_Cut_v2.mp4</span>
+                <!-- Floating Widget Left: Comment Bubble -->
+                <div class="hidden lg:flex absolute -left-12 top-24 z-20 p-3 rounded-xl bg-[#1c1b1b]/90 border border-white/10 backdrop-blur-xl shadow-2xl items-center gap-3 animate-bounce [animation-duration:4s]">
+                    <div class="w-8 h-8 rounded-full bg-accent/20 border border-accent/40 flex items-center justify-center text-accent font-bold text-xs font-mono">
+                        0:14
                     </div>
-                    <div class="flex items-center gap-3">
-                        <span class="text-[10px] font-mono-technical bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-2 py-0.5 rounded uppercase font-bold">● Live Sync</span>
-                        <span class="text-xs font-mono-technical text-gray-400 hidden sm:block">Share Token: <code class="text-accent font-mono">x9f8k2...</code></span>
+                    <div class="text-left text-xs">
+                        <div class="font-bold text-gray-200">Color Grade Shift</div>
+                        <div class="text-[10px] text-gray-400 font-mono-technical">"Make neon pop in intro frame"</div>
                     </div>
                 </div>
 
-                <!-- Mockup Body (Dual Video Player Simulation) -->
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                    
-                    <!-- Left 2 Cols: Player Mock -->
-                    <div class="lg:col-span-2 space-y-3">
-                        <div class="bg-black aspect-video rounded-xl border border-white/10 relative overflow-hidden flex items-center justify-center group/video">
-                            <!-- Background Dark Gradients to simulate video frame -->
-                            <div class="absolute inset-0 bg-gradient-to-tr from-slate-950 via-slate-900 to-indigo-950/40"></div>
-                            
-                            <!-- Central Play Icon Simulation -->
-                            <div class="w-16 h-16 rounded-full bg-accent/90 flex items-center justify-center shadow-2xl text-[#131313] group-hover/video:scale-110 transition-transform cursor-pointer">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 ml-1" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M8 5v14l11-7z" />
-                                </svg>
-                            </div>
+                <!-- Floating Widget Right: Sync Status Badge -->
+                <div class="hidden lg:flex absolute -right-10 top-36 z-20 p-3 rounded-xl bg-[#1c1b1b]/90 border border-white/10 backdrop-blur-xl shadow-2xl items-center gap-3">
+                    <div class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></div>
+                    <div class="text-left text-xs font-mono-technical">
+                        <div class="font-bold text-emerald-400">Sync Corrected (0.00s)</div>
+                        <div class="text-[10px] text-gray-400">Dual-Player Active</div>
+                    </div>
+                </div>
 
-                            <!-- Floating Comment Pins on Timeline Simulation -->
-                            <div class="absolute bottom-12 left-1/4 px-2.5 py-1 bg-accent text-[#131313] text-[10px] font-bold font-mono-technical rounded shadow-lg animate-bounce">
-                                00:14 — Color Grade Adjustment
-                            </div>
-
-                            <!-- Video Overlay Control Bar Mockup -->
-                            <div class="absolute bottom-0 inset-x-0 bg-slate-950/80 backdrop-blur-md p-3 border-t border-white/10 flex items-center gap-3">
-                                <span class="text-[11px] font-mono-technical text-accent">00:14 / 01:30</span>
-                                <div class="flex-1 h-1.5 bg-white/10 rounded-full relative">
-                                    <div class="w-1/4 h-full bg-accent rounded-full"></div>
-                                    <div class="absolute left-1/4 top-1/2 -translate-y-1/2 w-3 h-3 bg-accent rounded-full border-2 border-[#131313]"></div>
-                                </div>
-                                <span class="text-[10px] font-mono-technical bg-white/10 px-2 py-0.5 rounded text-gray-300">1080p60</span>
-                            </div>
+                <!-- Main Glassmorphic Showcase Container -->
+                <div class="glass-card p-4 sm:p-6 bg-[#1a1a1a]/70 border border-white/10 rounded-2xl shadow-2xl overflow-hidden relative group">
+                    <div class="flex justify-between items-center px-4 py-3 bg-[#131313] rounded-xl border border-white/5 mb-4">
+                        <div class="flex items-center gap-2">
+                            <div class="w-3 h-3 rounded-full bg-rose-500/80"></div>
+                            <div class="w-3 h-3 rounded-full bg-amber-500/80"></div>
+                            <div class="w-3 h-3 rounded-full bg-emerald-500/80"></div>
+                            <span class="ml-3 text-xs font-mono-technical text-gray-400 truncate">RevisionRoom // Project: Cyberpunk_Ad_Cut_v2.mp4</span>
+                        </div>
+                        <div class="flex items-center gap-3 font-mono-technical text-xs">
+                            <span class="bg-accent/10 border border-accent/30 text-accent px-2 py-0.5 rounded text-[10px] uppercase font-bold">Compare v1 vs v2</span>
                         </div>
                     </div>
 
-                    <!-- Right Col: Revision Checklist Mockup -->
-                    <div class="bg-[#131313] rounded-xl border border-white/10 p-4 space-y-3 flex flex-col justify-between">
-                        <div>
-                            <div class="flex justify-between items-center border-b border-white/5 pb-2 mb-3">
-                                <span class="text-xs font-mono-technical uppercase tracking-wider text-gray-400 font-bold">Revision Checklist</span>
-                                <span class="text-[10px] font-mono-technical text-accent">3 Comments</span>
+                    <!-- Dual Player Preview Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- v1 Player Box -->
+                        <div class="bg-black aspect-video rounded-xl border border-white/10 relative overflow-hidden flex flex-col justify-between p-3 group/p1">
+                            <div class="flex justify-between items-center z-10">
+                                <span class="bg-accent text-[#131313] font-bold font-mono-technical text-[10px] px-2 py-0.5 rounded uppercase">v1 (Original)</span>
+                                <span class="text-[10px] font-mono-technical text-gray-400">1080p // 24fps</span>
                             </div>
-
-                            <div class="space-y-2">
-                                <div class="p-2.5 rounded bg-white/5 border border-white/5 text-xs space-y-1">
-                                    <div class="flex justify-between items-center">
-                                        <span class="font-mono-technical bg-white/10 text-accent text-[10px] px-1.5 py-0.5 rounded">00:14</span>
-                                        <span class="text-[10px] text-sky-400 font-mono-technical">● Requested</span>
-                                    </div>
-                                    <p class="text-gray-200 text-[11px]">Make the neon highlights pop more in the opening scene.</p>
-                                </div>
-
-                                <div class="p-2.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-xs space-y-1">
-                                    <div class="flex justify-between items-center">
-                                        <span class="font-mono-technical bg-white/10 text-emerald-400 text-[10px] px-1.5 py-0.5 rounded">00:42</span>
-                                        <span class="text-[10px] text-emerald-400 font-mono-technical">✓ Resolved</span>
-                                    </div>
-                                    <p class="text-gray-300 text-[11px]">Trim 2 frames off the transition to lower audio dip.</p>
-                                </div>
+                            <div class="self-center w-12 h-12 rounded-full bg-white/20 border border-white/30 backdrop-blur-md flex items-center justify-center text-white cursor-pointer group-hover/p1:scale-110 transition-transform">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 ml-0.5" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
                             </div>
+                            <div class="w-full bg-white/10 h-1 rounded-full relative z-10"><div class="w-1/3 h-full bg-accent rounded-full"></div></div>
                         </div>
 
-                        <div class="pt-3 border-t border-white/5 flex justify-between items-center">
-                            <span class="text-[10px] text-gray-400 font-mono-technical">Status: Reviewing</span>
-                            <button class="btn-primary py-1 px-3 text-[11px] font-mono-technical">
-                                Submit Revisions
-                            </button>
+                        <!-- v2 Player Box -->
+                        <div class="bg-black aspect-video rounded-xl border border-white/10 relative overflow-hidden flex flex-col justify-between p-3 group/p2">
+                            <div class="flex justify-between items-center z-10">
+                                <span class="bg-accent text-[#131313] font-bold font-mono-technical text-[10px] px-2 py-0.5 rounded uppercase">v2 (Latest Cut)</span>
+                                <span class="text-[10px] font-mono-technical text-emerald-400 font-bold">● Active Revision</span>
+                            </div>
+                            <div class="self-center w-12 h-12 rounded-full bg-accent flex items-center justify-center text-[#131313] shadow-lg cursor-pointer group-hover/p2:scale-110 transition-transform">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 ml-0.5" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
+                            </div>
+                            <div class="w-full bg-white/10 h-1 rounded-full relative z-10"><div class="w-1/3 h-full bg-accent rounded-full"></div></div>
                         </div>
                     </div>
+                </div>
 
+            </div>
+        </section>
+
+        <!-- 2. LOGO TICKER / METRIC PROOF BAR -->
+        <section class="py-12 border-y border-white/5 bg-[#161515]">
+            <div class="max-w-7xl mx-auto px-6 text-center space-y-4">
+                <span class="text-[11px] font-mono-technical uppercase tracking-widest text-gray-500 font-bold">Trusted by Editors, Post Houses & Agencies Worldwide</span>
+                <div class="flex items-center justify-center gap-8 sm:gap-16 flex-wrap text-sm font-mono-technical text-gray-400 font-bold">
+                    <span class="hover:text-accent transition-colors">🎞️ FRAME.ACCURATE</span>
+                    <span class="hover:text-accent transition-colors">⚡ FFmpeg.FAST</span>
+                    <span class="hover:text-accent transition-colors">🔄 SYNC.PLAYBACK</span>
+                    <span class="hover:text-accent transition-colors">📄 PDF.CERTIFIED</span>
+                    <span class="hover:text-accent transition-colors">🔒 MAGIC.LINKS</span>
                 </div>
             </div>
         </section>
 
-        <!-- Feature Grid Section -->
+        <!-- 3. FEATURE SECTION 1: SIDE-BY-SIDE SYNC PLAYER -->
+        <section id="compare" class="py-24 px-6 max-w-7xl mx-auto relative z-10 space-y-16">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                
+                <!-- Left Text Column -->
+                <div class="space-y-6 text-left">
+                    <span class="text-xs font-mono-technical uppercase tracking-widest text-accent font-bold bg-accent/10 border border-accent/20 px-3 py-1 rounded-full">
+                        SYNCHRONIZED DUAL PLAYER
+                    </span>
+                    <h2 class="text-3xl sm:text-5xl font-editorial font-bold text-gray-100 leading-tight">
+                        Compare versions side-by-side without missing a frame.
+                    </h2>
+                    <p class="text-gray-400 text-sm sm:text-base font-sans leading-relaxed">
+                        Never guess what changed between cuts. RevisionRoom links two draft versions with automatic drift correction, pre-buffering barrier sync, and sub-frame playback rate matching.
+                    </p>
+                    <ul class="space-y-3 text-xs font-mono-technical text-gray-300">
+                        <li class="flex items-center gap-2">
+                            <span class="text-accent font-bold">✓</span> Real-time drift correction (<0.15s threshold)
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="text-accent font-bold">✓</span> Automatic buffering pause and barrier re-sync
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="text-accent font-bold">✓</span> Master timeline slider controlling both videos
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="text-accent font-bold">✓</span> Instant comment jump to exact timestamp on both cuts
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Right Graphic Box -->
+                <div class="glass-card p-6 bg-[#1a1a1a]/60 border border-white/10 rounded-2xl relative overflow-hidden shadow-2xl">
+                    <div class="space-y-4">
+                        <div class="p-4 bg-slate-950 rounded-xl border border-white/5 flex items-center justify-between text-xs font-mono-technical">
+                            <span class="text-gray-400">Master Clock: <span class="text-accent font-bold">01:24.08</span></span>
+                            <span class="text-emerald-400 font-bold">● Both Ready (canplaythrough)</span>
+                        </div>
+                        <div class="p-4 bg-white/5 rounded-xl border border-white/5 text-xs space-y-2">
+                            <div class="flex justify-between items-center text-[10px] font-mono-technical">
+                                <span class="text-accent font-bold">v1 Feedback (01:24)</span>
+                                <span class="text-gray-400">Client: Alex Rivera</span>
+                            </div>
+                            <p class="text-gray-200 text-xs">"The color tone here feels too dark. Can we lift the shadows?"</p>
+                        </div>
+                        <div class="p-4 bg-sky-500/10 rounded-xl border border-sky-500/20 text-xs space-y-2">
+                            <div class="flex justify-between items-center text-[10px] font-mono-technical">
+                                <span class="text-sky-300 font-bold">v2 Fix Applied (01:24)</span>
+                                <span class="text-sky-400 font-bold">✓ Revision Batch Active</span>
+                            </div>
+                            <p class="text-sky-100 text-xs">"Shadows lifted by +15%. Color grade matched in v2."</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 4. FEATURE BENTO GRID SECTION -->
         <section id="features" class="py-20 px-6 max-w-7xl mx-auto relative z-10 space-y-12">
             <div class="text-center space-y-4">
-                <span class="text-xs font-mono-technical uppercase tracking-widest text-accent font-bold">Built for Video Creators</span>
-                <h2 class="text-3xl sm:text-5xl font-editorial font-bold text-gray-100">Everything You Need for Seamless Reviews</h2>
-                <p class="text-gray-400 text-sm sm:text-base max-w-xl mx-auto">Eliminate friction, speed up turnarounds, and keep clients thrilled with your post-production workflow.</p>
+                <span class="text-xs font-mono-technical uppercase tracking-widest text-accent font-bold">Built For High-Speed Workflows</span>
+                <h2 class="text-3xl sm:text-5xl font-editorial font-bold text-gray-100">Designed to delete friction from video feedback.</h2>
+                <p class="text-gray-400 text-sm sm:text-base max-w-xl mx-auto">Every feature is crafted specifically for video editors, motion designers, and post-production studios.</p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Bento 3-Card Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 
-                <!-- Feature 1 -->
-                <div class="glass-card p-6 bg-[#1a1a1a]/50 border border-white/5 hover:border-accent/30 transition-all duration-300 space-y-4">
-                    <div class="w-12 h-12 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center text-accent">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-                        </svg>
+                <!-- Bento Card 1: Clipboard Screenshot Paste -->
+                <div class="glass-card p-6 bg-[#1a1a1a]/50 border border-white/5 hover:border-accent/40 transition-all duration-300 space-y-4 flex flex-col justify-between">
+                    <div class="space-y-3">
+                        <div class="w-10 h-10 rounded-lg bg-accent/10 border border-accent/20 flex items-center justify-center text-accent font-bold">
+                            📋
+                        </div>
+                        <h3 class="text-xl font-editorial font-bold text-gray-200">Clipboard Image Paste</h3>
+                        <p class="text-xs text-gray-400 leading-relaxed">Clients can copy any screenshot and paste it directly into the feedback box with <kbd class="px-1.5 py-0.5 bg-white/10 rounded text-[10px] font-mono text-accent">Ctrl+V</kbd>. No file picker required.</p>
                     </div>
-                    <h3 class="text-lg font-editorial font-bold text-gray-200">Synchronized Dual Player</h3>
-                    <p class="text-xs text-gray-400 leading-relaxed font-sans">Compare v1 and v2 side-by-side with automatic drift correction, pre-buffering barriers, and unified master scrubbers.</p>
+                    <div class="p-3 bg-slate-950 rounded-lg border border-white/10 text-[10px] font-mono-technical text-gray-400 flex items-center justify-between">
+                        <span>Image Attached: <code class="text-accent">screenshot_01.png</code></span>
+                        <span class="text-emerald-400 font-bold">✓ Ready</span>
+                    </div>
                 </div>
 
-                <!-- Feature 2 -->
-                <div class="glass-card p-6 bg-[#1a1a1a]/50 border border-white/5 hover:border-emerald-500/30 transition-all duration-300 space-y-4">
-                    <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                        </svg>
+                <!-- Bento Card 2: Passwordless Magic Links -->
+                <div class="glass-card p-6 bg-[#1a1a1a]/50 border border-white/5 hover:border-emerald-500/40 transition-all duration-300 space-y-4 flex flex-col justify-between">
+                    <div class="space-y-3">
+                        <div class="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold">
+                            🔗
+                        </div>
+                        <h3 class="text-xl font-editorial font-bold text-gray-200">Passwordless Magic Links</h3>
+                        <p class="text-xs text-gray-400 leading-relaxed">Share one secure tokenized link with clients. They review, comment, and sign off instantly on any desktop or mobile browser without signing up.</p>
                     </div>
-                    <h3 class="text-lg font-editorial font-bold text-gray-200">Paste Screenshot Feedback</h3>
-                    <p class="text-xs text-gray-400 leading-relaxed font-sans">Clients can paste clipboard screenshots directly into comments with <kbd class="px-1 py-0.5 bg-white/10 rounded text-[10px] font-mono">Ctrl+V</kbd> alongside frame-exact timestamps.</p>
+                    <div class="p-3 bg-slate-950 rounded-lg border border-white/10 text-[10px] font-mono-technical text-gray-400 truncate">
+                        <code>https://revisionroom.com/review/x9f8k2m1...</code>
+                    </div>
                 </div>
 
-                <!-- Feature 3 -->
-                <div class="glass-card p-6 bg-[#1a1a1a]/50 border border-white/5 hover:border-indigo-500/30 transition-all duration-300 space-y-4">
-                    <div class="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                        </svg>
+                <!-- Bento Card 3: Verifiable PDF Certificates -->
+                <div class="glass-card p-6 bg-[#1a1a1a]/50 border border-white/5 hover:border-sky-500/40 transition-all duration-300 space-y-4 flex flex-col justify-between">
+                    <div class="space-y-3">
+                        <div class="w-10 h-10 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400 font-bold">
+                            📄
+                        </div>
+                        <h3 class="text-xl font-editorial font-bold text-gray-200">PDF Sign-Off Audit Trails</h3>
+                        <p class="text-xs text-gray-400 leading-relaxed">Once client approves a project, lock revisions and generate a watermarked PDF audit certificate containing approver details, timestamp, and signature log.</p>
                     </div>
-                    <h3 class="text-lg font-editorial font-bold text-gray-200">Passwordless Magic Links</h3>
-                    <p class="text-xs text-gray-400 leading-relaxed font-sans">Zero login barrier for clients. Send one secure share link and let them review immediately on any desktop or mobile device.</p>
-                </div>
-
-                <!-- Feature 4 -->
-                <div class="glass-card p-6 bg-[#1a1a1a]/50 border border-white/5 hover:border-sky-500/30 transition-all duration-300 space-y-4">
-                    <div class="w-12 h-12 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
+                    <div class="p-3 bg-slate-950 rounded-lg border border-white/10 text-[10px] font-mono-technical text-sky-400 flex items-center justify-between">
+                        <span>Approval PDF Generated</span>
+                        <span class="font-bold">Download ↓</span>
                     </div>
-                    <h3 class="text-lg font-editorial font-bold text-gray-200">Verifiable PDF Audit Trail</h3>
-                    <p class="text-xs text-gray-400 leading-relaxed font-sans">Once approved, generate a legally traceable PDF audit record complete with approver name, timestamp, and signature log.</p>
                 </div>
 
             </div>
         </section>
 
-        <!-- Step-by-Step Workflow Section -->
-        <section id="workflow" class="py-16 px-6 max-w-7xl mx-auto border-t border-white/5 relative z-10 space-y-12">
-            <div class="text-center space-y-3">
-                <span class="text-xs font-mono-technical uppercase tracking-widest text-accent font-bold">Simple 4-Step Process</span>
-                <h2 class="text-3xl sm:text-4xl font-editorial font-bold text-gray-100">How RevisionRoom Works</h2>
+        <!-- 5. DRAMATIC DARK SECTION: HORIZON GLOW & TECH SPECS -->
+        <section id="tech" class="py-28 px-6 bg-gradient-to-b from-[#131313] via-[#0d0d0d] to-[#131313] relative overflow-hidden border-t border-white/5">
+            
+            <!-- Curved Horizon Light Beam Glow -->
+            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[300px] bg-gradient-to-b from-accent/20 via-indigo-500/10 to-transparent rounded-b-[100%] blur-3xl pointer-events-none"></div>
+
+            <div class="max-w-7xl mx-auto text-center space-y-16 relative z-10">
+                <div class="space-y-4">
+                    <span class="text-xs font-mono-technical uppercase tracking-widest text-accent font-bold">Universal Post-Production Architecture</span>
+                    <h2 class="text-4xl sm:text-6xl font-editorial font-bold text-gray-100">Engineered for Video Teams</h2>
+                    <p class="text-gray-400 text-sm sm:text-base max-w-xl mx-auto">High-performance video streaming powered by chunked uploads, FFmpeg background queue workers, and Inertia live polling.</p>
+                </div>
+
+                <!-- 4 Spec Pillar Counters -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+                    <div class="p-6 bg-[#171616] border border-white/5 rounded-xl space-y-2">
+                        <div class="text-3xl sm:text-4xl font-mono-technical font-bold text-accent">0.00s</div>
+                        <div class="text-xs font-mono-technical text-gray-400 uppercase tracking-wider">Sync Drift Threshold</div>
+                    </div>
+                    <div class="p-6 bg-[#171616] border border-white/5 rounded-xl space-y-2">
+                        <div class="text-3xl sm:text-4xl font-mono-technical font-bold text-emerald-400">4.0s</div>
+                        <div class="text-xs font-mono-technical text-gray-400 uppercase tracking-wider">Background Poll Sync</div>
+                    </div>
+                    <div class="p-6 bg-[#171616] border border-white/5 rounded-xl space-y-2">
+                        <div class="text-3xl sm:text-4xl font-mono-technical font-bold text-indigo-400">10MB</div>
+                        <div class="text-xs font-mono-technical text-gray-400 uppercase tracking-wider">Chunked Stream Uploads</div>
+                    </div>
+                    <div class="p-6 bg-[#171616] border border-white/5 rounded-xl space-y-2">
+                        <div class="text-3xl sm:text-4xl font-mono-technical font-bold text-sky-400">100%</div>
+                        <div class="text-xs font-mono-technical text-gray-400 uppercase tracking-wider">Browser Native Player</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. STEP-BY-STEP WORKFLOW TIMELINE -->
+        <section id="workflow" class="py-24 px-6 max-w-7xl mx-auto relative z-10 space-y-16">
+            <div class="text-center space-y-4">
+                <span class="text-xs font-mono-technical uppercase tracking-widest text-accent font-bold">End-to-End Workflow</span>
+                <h2 class="text-3xl sm:text-5xl font-editorial font-bold text-gray-100">From raw edit to final sign-off in 4 steps.</h2>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 relative">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <!-- Step 1 -->
-                <div class="space-y-3 bg-[#1a1a1a]/30 p-5 rounded-xl border border-white/5">
-                    <span class="text-2xl font-mono-technical font-bold text-accent">01.</span>
-                    <h4 class="font-editorial font-bold text-gray-200">Upload Video Draft</h4>
-                    <p class="text-xs text-gray-400">Chunked background upload with automatic FFmpeg transcoding into streamable MP4 format.</p>
+                <div class="p-6 bg-[#1a1a1a]/40 border border-white/5 rounded-xl space-y-3 relative">
+                    <span class="text-3xl font-mono-technical font-bold text-accent">01</span>
+                    <h4 class="font-editorial font-bold text-gray-200 text-lg">Upload Draft</h4>
+                    <p class="text-xs text-gray-400 leading-relaxed">Chunked background upload processes large video files into streamable H.264 formats.</p>
                 </div>
 
                 <!-- Step 2 -->
-                <div class="space-y-3 bg-[#1a1a1a]/30 p-5 rounded-xl border border-white/5">
-                    <span class="text-2xl font-mono-technical font-bold text-emerald-400">02.</span>
-                    <h4 class="font-editorial font-bold text-gray-200">Share Client Link</h4>
-                    <p class="text-xs text-gray-400">Copy the secure magic URL and send it to your client. No sign-up or passwords required.</p>
+                <div class="p-6 bg-[#1a1a1a]/40 border border-white/5 rounded-xl space-y-3 relative">
+                    <span class="text-3xl font-mono-technical font-bold text-emerald-400">02</span>
+                    <h4 class="font-editorial font-bold text-gray-200 text-lg">Send Magic Link</h4>
+                    <p class="text-xs text-gray-400 leading-relaxed">Copy and send the passwordless share link to clients. Instant access on mobile or desktop.</p>
                 </div>
 
                 <!-- Step 3 -->
-                <div class="space-y-3 bg-[#1a1a1a]/30 p-5 rounded-xl border border-white/5">
-                    <span class="text-2xl font-mono-technical font-bold text-indigo-400">03.</span>
-                    <h4 class="font-editorial font-bold text-gray-200">Receive Live Feedback</h4>
-                    <p class="text-xs text-gray-400">Client comments lock to current video frame. Real-time 4s polling syncs editor and client views.</p>
+                <div class="p-6 bg-[#1a1a1a]/40 border border-white/5 rounded-xl space-y-3 relative">
+                    <span class="text-3xl font-mono-technical font-bold text-indigo-400">03</span>
+                    <h4 class="font-editorial font-bold text-gray-200 text-lg">Collect Revisions</h4>
+                    <p class="text-xs text-gray-400 leading-relaxed">Clients leave frame-locked comments and paste screenshots. Editor views live sync automatically.</p>
                 </div>
 
                 <!-- Step 4 -->
-                <div class="space-y-3 bg-[#1a1a1a]/30 p-5 rounded-xl border border-white/5">
-                    <span class="text-2xl font-mono-technical font-bold text-sky-400">04.</span>
-                    <h4 class="font-editorial font-bold text-gray-200">Client Sign-off & PDF</h4>
-                    <p class="text-xs text-gray-400">Client signs off on the project. Project locks and generates an instant PDF verification record.</p>
+                <div class="p-6 bg-[#1a1a1a]/40 border border-white/5 rounded-xl space-y-3 relative">
+                    <span class="text-3xl font-mono-technical font-bold text-sky-400">04</span>
+                    <h4 class="font-editorial font-bold text-gray-200 text-lg">Get PDF Sign-off</h4>
+                    <p class="text-xs text-gray-400 leading-relaxed">Client signs off on final cut. Project locks and generates a verified approval PDF certificate.</p>
                 </div>
             </div>
         </section>
 
-        <!-- Call to Action Banner -->
-        <section class="py-16 px-6 max-w-7xl mx-auto relative z-10">
-            <div class="glass-card p-8 sm:p-12 bg-gradient-to-r from-[#1c1b1b] via-[#222121] to-[#1c1b1b] border border-white/10 rounded-2xl text-center space-y-6 relative overflow-hidden shadow-2xl">
-                <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-accent/10 rounded-full blur-3xl pointer-events-none"></div>
-                
-                <h2 class="text-3xl sm:text-4xl font-editorial font-bold text-gray-100">Ready to Upgrade Your Video Feedback?</h2>
-                <p class="text-sm text-gray-400 max-w-xl mx-auto font-sans">Start reviewing drafts with your clients right now. No credit card required.</p>
-                
-                <div class="pt-2 flex justify-center items-center gap-4 flex-wrap">
-                    <Link v-if="!auth_user" :href="route('register')" class="btn-primary py-3 px-8 text-sm text-[#131313] font-bold shadow-lg">
-                        Get Started Free →
+        <!-- 7. TESTIMONIAL / CUSTOMER QUOTE HIGHLIGHT -->
+        <section class="py-16 px-6 max-w-5xl mx-auto relative z-10">
+            <div class="glass-card p-8 sm:p-12 bg-[#1a1a1a]/50 border border-white/10 rounded-2xl text-center space-y-6 shadow-2xl">
+                <div class="text-accent text-3xl font-serif">“</div>
+                <blockquote class="text-xl sm:text-2xl font-editorial font-bold text-gray-100 max-w-3xl mx-auto leading-relaxed">
+                    RevisionRoom cut our commercial video review cycles from 5 days down to 4 hours. The dual sync comparison player completely stopped client confusion on version changes.
+                </blockquote>
+                <div class="flex flex-col items-center gap-1 font-mono-technical text-xs">
+                    <span class="text-gray-200 font-bold">Marcus Vance</span>
+                    <span class="text-gray-400">Lead Post Producer // Apex Media Studio</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- 8. BIG CTA BANNER WITH CURVED ARC GLOW -->
+        <section class="py-20 px-6 max-w-7xl mx-auto relative z-10">
+            <div class="glass-card p-10 sm:p-16 bg-gradient-to-b from-[#1c1b1b] to-[#131313] border border-white/10 rounded-3xl text-center space-y-8 relative overflow-hidden shadow-2xl">
+                <!-- Arc Glow background -->
+                <div class="absolute -top-24 left-1/2 -translate-x-1/2 w-[600px] h-[200px] bg-accent/20 rounded-b-full blur-3xl pointer-events-none"></div>
+
+                <h2 class="text-3xl sm:text-5xl font-editorial font-bold text-gray-100 leading-tight">
+                    Start reviewing video drafts <br class="hidden sm:block" />
+                    with your clients today.
+                </h2>
+                <p class="text-sm sm:text-base text-gray-400 max-w-xl mx-auto font-sans">
+                    Join video editors, post houses, and agencies already using RevisionRoom.
+                </p>
+
+                <div class="pt-4 flex justify-center items-center gap-4 flex-wrap">
+                    <Link v-if="!auth_user" :href="route('register')" class="btn-primary py-4 px-9 text-sm font-bold font-mono-technical uppercase tracking-wider text-[#131313] shadow-[0_0_30px_rgba(203,251,69,0.4)] hover:scale-105 transition-all">
+                        Create Free Workspace →
                     </Link>
-                    <Link v-else :href="route('dashboard')" class="btn-primary py-3 px-8 text-sm text-[#131313] font-bold shadow-lg">
+                    <Link v-else :href="route('dashboard')" class="btn-primary py-4 px-9 text-sm font-bold font-mono-technical uppercase tracking-wider text-[#131313] shadow-[0_0_30px_rgba(203,251,69,0.4)] hover:scale-105 transition-all">
                         Go to Dashboard →
                     </Link>
                 </div>
             </div>
         </section>
 
-        <!-- Footer -->
-        <footer class="border-t border-white/5 py-8 px-6 text-center text-xs text-gray-500 font-mono-technical space-y-2">
-            <p>RevisionRoom © 2026. Next-Gen Video Collaboration Platform.</p>
-            <div class="flex justify-center gap-4 text-gray-400">
-                <a href="#features" class="hover:text-accent">Features</a>
-                <span>•</span>
-                <a href="#workflow" class="hover:text-accent">Workflow</a>
-                <span>•</span>
-                <Link :href="route('login')" class="hover:text-accent">Sign In</Link>
+        <!-- 9. MULTI-COLUMN FOOTER -->
+        <footer class="border-t border-white/5 py-16 px-6 bg-[#0f0e0e] text-xs text-gray-500 font-mono-technical">
+            <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-5 gap-10">
+                
+                <!-- Col 1: Brand Info -->
+                <div class="md:col-span-2 space-y-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-7 h-7 rounded bg-accent flex items-center justify-center text-[#131313] font-black text-sm">
+                            R
+                        </div>
+                        <span class="text-lg font-editorial font-bold text-gray-100">RevisionRoom</span>
+                    </div>
+                    <p class="text-gray-400 text-xs max-w-sm font-sans leading-relaxed">
+                        The next-generation video review and client approval platform for post-production creators.
+                    </p>
+                    <div class="text-gray-600 text-[11px]">
+                        © 2026 RevisionRoom Inc. All rights reserved.
+                    </div>
+                </div>
+
+                <!-- Col 2: Product -->
+                <div class="space-y-3">
+                    <span class="font-bold uppercase tracking-wider text-gray-300 text-[10px]">Product</span>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#compare" class="hover:text-accent transition-colors">Sync Player</a></li>
+                        <li><a href="#features" class="hover:text-accent transition-colors">Clipboard Paste</a></li>
+                        <li><a href="#features" class="hover:text-accent transition-colors">Magic Share Links</a></li>
+                        <li><a href="#features" class="hover:text-accent transition-colors">PDF Sign-offs</a></li>
+                    </ul>
+                </div>
+
+                <!-- Col 3: Workflows -->
+                <div class="space-y-3">
+                    <span class="font-bold uppercase tracking-wider text-gray-300 text-[10px]">Workflows</span>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#workflow" class="hover:text-accent transition-colors">Video Editors</a></li>
+                        <li><a href="#workflow" class="hover:text-accent transition-colors">Motion Design</a></li>
+                        <li><a href="#workflow" class="hover:text-accent transition-colors">Commercial Agencies</a></li>
+                        <li><a href="#workflow" class="hover:text-accent transition-colors">Post Houses</a></li>
+                    </ul>
+                </div>
+
+                <!-- Col 4: Account / Portal -->
+                <div class="space-y-3">
+                    <span class="font-bold uppercase tracking-wider text-gray-300 text-[10px]">Access</span>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><Link :href="route('login')" class="hover:text-accent transition-colors">Log In</Link></li>
+                        <li><Link :href="route('register')" class="hover:text-accent transition-colors">Register</Link></li>
+                        <li><Link v-if="auth_user" :href="route('dashboard')" class="hover:text-accent transition-colors">Dashboard</Link></li>
+                    </ul>
+                </div>
+
             </div>
         </footer>
 
