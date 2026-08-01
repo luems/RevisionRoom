@@ -107,6 +107,23 @@ const handleImageSelect = (e) => {
     }
 };
 
+const handlePaste = (e) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+
+    for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        if (item.type.startsWith('image/')) {
+            const file = item.getAsFile();
+            if (file) {
+                commentForm.image = file;
+                imagePreviewUrl.value = URL.createObjectURL(file);
+                break;
+            }
+        }
+    }
+};
+
 const removeSelectedImage = () => {
     commentForm.image = null;
     imagePreviewUrl.value = null;
@@ -321,7 +338,7 @@ const showGuide = ref(false);
                     </div>
 
                     <form @submit.prevent="submitComment" class="space-y-4">
-                        <textarea v-model="commentForm.content" @focus="handleCommentFocus" placeholder="Type here... (Video pauses automatically to let you type)" rows="3" class="w-full bg-slate-950/50 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500" required></textarea>
+                        <textarea v-model="commentForm.content" @focus="handleCommentFocus" @paste="handlePaste" placeholder="Type here or paste screenshot (Ctrl+V)... (Video pauses automatically to let you type)" rows="3" class="w-full bg-slate-950/50 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500" required></textarea>
 
                         <!-- Image Attachment Section -->
                         <div class="flex items-center gap-4 flex-wrap">
