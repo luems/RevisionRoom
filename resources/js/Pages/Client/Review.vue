@@ -18,6 +18,10 @@ const activeDraft = computed(() => {
     return props.project.drafts[currentDraftIndex.value];
 });
 
+const isSubmitted = computed(() => {
+    return !!props.project.changes_submitted_at;
+});
+
 // Live polling for comments and project updates
 let pollInterval = null;
 
@@ -376,8 +380,14 @@ const showGuide = ref(false);
 
                     <!-- Checklist list -->
                     <div v-else class="flex-1 overflow-y-auto space-y-4 pr-2">
-                        <div v-for="comment in activeDraft.comments" :key="comment.id" :class="`p-4 rounded-sm border transition-all ${
-                            comment.is_resolved ? 'bg-[#1a1a1a]/40 border-emerald-500/20 opacity-60' : comment.is_rejected ? 'bg-[#1a1a1a]/40 border-rose-500/20' : 'bg-[#1a1a1a] border-white/5'
+                        <div v-for="comment in activeDraft.comments" :key="comment.id" :class="`p-4 rounded-sm border transition-all duration-300 ${
+                            comment.is_resolved 
+                                ? 'bg-[#1a1a1a]/40 border-emerald-500/20 opacity-60' 
+                                : comment.is_rejected 
+                                ? 'bg-[#1a1a1a]/40 border-rose-500/20' 
+                                : isSubmitted 
+                                ? 'bg-[#1c1d26] border-sky-400 shadow-[0_0_15px_rgba(56,189,248,0.2)] ring-1 ring-sky-400/40' 
+                                : 'bg-[#1a1a1a] border-white/5'
                         }`">
                             <div class="flex items-start justify-between gap-3">
                                 <div>
@@ -414,6 +424,9 @@ const showGuide = ref(false);
                                     <span v-else-if="comment.is_rejected" class="text-rose-400 flex items-center gap-1">
                                         🚫 Declined
                                     </span>
+                                    <span v-else-if="isSubmitted" class="text-sky-400 flex items-center gap-1 font-mono-technical">
+                                        ● Active Change
+                                    </span>
                                     <span v-else class="text-amber-500 flex items-center gap-1">
                                         ○ Open
                                     </span>
@@ -429,21 +442,25 @@ const showGuide = ref(false);
                         </div>
                     </div>
 
-                    <!-- Mark current changes that need to be done button -->
+                    <!-- Mark current changes / Submit Revision Requests button -->
                     <div v-if="activeDraft && project.status !== 'approved' && project.status !== 'archived'" class="mt-4 pt-3 border-t border-white/5 flex justify-between items-center gap-3">
-                        <span v-if="markedSuccess" class="text-xs text-emerald-400 font-mono-technical font-bold flex items-center gap-1">
-                            ✓ Marked for editor
-                        </span>
-                        <span v-else class="text-[10px] text-gray-500 font-mono-technical">
-                            Finished commenting?
+                        <span class="text-xs text-gray-400 font-mono-technical">
+                            {{ isSubmitted ? 'Status: Revision batch sent' : 'Ready for editor?' }}
                         </span>
                         <button 
                             type="button" 
                             @click="markCurrentChanges" 
-                            class="btn-secondary py-1.5 px-3 text-xs border-accent/30 text-accent hover:bg-accent/10 font-bold transition-all ml-auto"
+                            :class="`py-2 px-4 text-xs font-bold font-mono-technical uppercase tracking-wider rounded-sm transition-all shadow-md flex items-center gap-2 ${
+                                isSubmitted 
+                                    ? 'bg-sky-500/20 text-sky-300 border border-sky-400/50 hover:bg-sky-500/30' 
+                                    : 'bg-accent text-[#131313] hover:bg-[#d6ff1a] border border-accent/80'
+                            }`"
                             :disabled="markingChanges"
                         >
-                            {{ markingChanges ? 'Saving...' : 'mark as current changes that need to be done' }}
+                            <svg v-if="isSubmitted" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-sky-400" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                            </svg>
+                            <span>{{ markingChanges ? 'Submitting...' : isSubmitted ? 'Revision Requests Submitted' : 'Submit Revision Requests' }}</span>
                         </button>
                     </div>
                 </div>

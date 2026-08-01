@@ -60,8 +60,9 @@ class ClientPortalController extends Controller
         if ($project->status !== 'approved' && $project->status !== 'archived') {
             $project->status = 'active';
         }
+        $project->changes_submitted_at = now();
         $project->touch(); // Touch updated_at so editor views catch the update
 
-        return redirect()->back()->with('success', 'Marked current changes as ready for editor.');
+        return redirect()->back()->with('success', 'Revision batch submitted to editor.');
     }
 }

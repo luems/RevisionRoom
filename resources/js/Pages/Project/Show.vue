@@ -19,6 +19,10 @@ const activeDraft = computed(() => {
     return props.project.drafts[currentDraftIndex.value];
 });
 
+const isSubmitted = computed(() => {
+    return !!props.project.changes_submitted_at;
+});
+
 // Live polling for comments and project updates
 let pollInterval = null;
 
@@ -448,8 +452,14 @@ onMounted(() => {
                             </div>
 
                             <div v-else class="flex-1 overflow-y-auto space-y-4 pr-2">
-                                <div v-for="comment in activeDraft.comments" :key="comment.id" :class="`p-4 rounded-sm border transition-all duration-200 ${
-                                    comment.is_resolved ? 'bg-[#1a1a1a]/40 border-emerald-500/20 opacity-60' : comment.is_rejected ? 'bg-[#1a1a1a]/40 border-rose-500/20' : 'bg-[#1a1a1a] border-white/5'
+                                <div v-for="comment in activeDraft.comments" :key="comment.id" :class="`p-4 rounded-sm border transition-all duration-300 ${
+                                    comment.is_resolved 
+                                        ? 'bg-[#1a1a1a]/40 border-emerald-500/20 opacity-60' 
+                                        : comment.is_rejected 
+                                        ? 'bg-[#1a1a1a]/40 border-rose-500/20' 
+                                        : isSubmitted 
+                                        ? 'bg-[#1c1d26] border-sky-400 shadow-[0_0_15px_rgba(56,189,248,0.2)] ring-1 ring-sky-400/40' 
+                                        : 'bg-[#1a1a1a] border-white/5'
                                 }`">
                                     <div class="flex items-start justify-between gap-3">
                                         <div class="flex-1">
