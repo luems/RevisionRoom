@@ -99,68 +99,132 @@ const activeFeature = ref('sync');
                 </Link>
             </div>
 
-            <!-- Hero Product Showcase Mockup with Floating Tool Widgets -->
-            <div class="pt-8 relative max-w-6xl mx-auto">
+            <!-- Hero Product Showcase: Editor Dashboard Screenshot Mockup -->
+            <div class="pt-8 relative max-w-6xl mx-auto text-left">
                 
-                <!-- Floating Widget Left: Comment Bubble -->
-                <div class="hidden lg:flex absolute -left-12 top-24 z-20 p-3 rounded-xl bg-[#1c1b1b] border border-white/10 shadow-xl items-center gap-3">
-                    <div class="w-8 h-8 rounded-full bg-accent/20 border border-accent/40 flex items-center justify-center text-accent font-bold text-xs font-mono">
-                        0:14
-                    </div>
-                    <div class="text-left text-xs">
-                        <div class="font-bold text-gray-200">Color Grade Shift</div>
-                        <div class="text-[10px] text-gray-400 font-mono-technical">"Make neon pop in intro frame"</div>
-                    </div>
-                </div>
-
-                <!-- Floating Widget Right: Sync Status Badge -->
-                <div class="hidden lg:flex absolute -right-10 top-36 z-20 p-3 rounded-xl bg-[#1c1b1b] border border-white/10 shadow-xl items-center gap-3">
-                    <div class="w-2.5 h-2.5 rounded-full bg-emerald-400"></div>
-                    <div class="text-left text-xs font-mono-technical">
-                        <div class="font-bold text-emerald-400">Sync Corrected (0.00s)</div>
-                        <div class="text-[10px] text-gray-400">Dual-Player Active</div>
-                    </div>
-                </div>
-
                 <!-- Main Glassmorphic Showcase Container -->
-                <div class="glass-card p-4 sm:p-6 bg-[#1a1a1a] border border-white/10 rounded-2xl shadow-xl overflow-hidden relative group">
-                    <div class="flex justify-between items-center px-4 py-3 bg-[#131313] rounded-xl border border-white/5 mb-4">
-                        <div class="flex items-center gap-2">
-                            <div class="w-3 h-3 rounded-full bg-rose-500/80"></div>
-                            <div class="w-3 h-3 rounded-full bg-amber-500/80"></div>
-                            <div class="w-3 h-3 rounded-full bg-emerald-500/80"></div>
-                            <span class="ml-3 text-xs font-mono-technical text-gray-400 truncate">RevisionRoom // Project: Cyberpunk_Ad_Cut_v2.mp4</span>
+                <div class="glass-card p-4 sm:p-6 bg-[#1a1a1a] border border-white/10 rounded-2xl shadow-xl overflow-hidden relative">
+                    
+                    <!-- Dashboard Window Header Bar -->
+                    <div class="flex justify-between items-center px-4 py-3 bg-[#131313] rounded-xl border border-white/5 mb-5">
+                        <div class="flex items-center gap-3">
+                            <div class="flex items-center gap-1.5">
+                                <div class="w-3 h-3 rounded-full bg-rose-500/80"></div>
+                                <div class="w-3 h-3 rounded-full bg-amber-500/80"></div>
+                                <div class="w-3 h-3 rounded-full bg-emerald-500/80"></div>
+                            </div>
+                            <span class="text-xs font-mono-technical text-gray-300 font-bold tracking-tight">RevisionRoom Studio // Editor Dashboard</span>
                         </div>
-                        <div class="flex items-center gap-3 font-mono-technical text-xs">
-                            <span class="bg-accent/10 border border-accent/30 text-accent px-2 py-0.5 rounded text-[10px] uppercase font-bold">Compare v1 vs v2</span>
+                        <div class="flex items-center gap-3">
+                            <div class="bg-accent text-[#131313] font-bold font-mono-technical text-[11px] px-3 py-1 rounded-sm uppercase tracking-wider flex items-center gap-1">
+                                <span>+ New Project</span>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Dual Player Preview Grid -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <!-- v1 Player Box -->
-                        <div class="bg-black aspect-video rounded-xl border border-white/10 relative overflow-hidden flex flex-col justify-between p-3 group/p1">
-                            <div class="flex justify-between items-center z-10">
-                                <span class="bg-accent text-[#131313] font-bold font-mono-technical text-[10px] px-2 py-0.5 rounded uppercase">v1 (Original)</span>
-                                <span class="text-[10px] font-mono-technical text-gray-400">1080p // 24fps</span>
+                    <!-- Dashboard Filter Bar -->
+                    <div class="flex justify-between items-center mb-5 pb-4 border-b border-white/5 flex-wrap gap-3">
+                        <div>
+                            <h3 class="text-lg font-editorial font-bold text-gray-100">Active Studio Projects</h3>
+                            <p class="text-xs text-gray-400 font-mono-technical">Manage client reviews, draft uploads, and instant approvals.</p>
+                        </div>
+                        <div class="flex items-center gap-2 text-xs font-mono-technical">
+                            <span class="px-2.5 py-1 rounded-sm bg-accent text-[#131313] font-bold">All (3)</span>
+                            <span class="px-2.5 py-1 rounded-sm bg-white/5 text-gray-400 border border-white/5">Active (2)</span>
+                            <span class="px-2.5 py-1 rounded-sm bg-white/5 text-gray-400 border border-white/5">Approved (1)</span>
+                        </div>
+                    </div>
+
+                    <!-- Dashboard Projects Grid (3 Mock Cards) -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                        
+                        <!-- Mock Project 1 -->
+                        <div class="glass-card bg-[#161515] border border-white/5 rounded-xl overflow-hidden hover:border-accent/40 transition-all flex flex-col justify-between">
+                            <div class="h-36 bg-slate-900/80 relative flex items-center justify-center border-b border-white/5">
+                                <div class="absolute inset-0 bg-gradient-to-tr from-slate-950 via-slate-900 to-indigo-950/60"></div>
+                                <div class="w-10 h-10 rounded-full bg-accent/90 flex items-center justify-center text-[#131313] z-10 shadow-lg">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-0.5" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
+                                </div>
+                                <div class="absolute top-2.5 right-2.5 z-10">
+                                    <span class="bg-[#131313]/90 border border-white/10 px-2 py-0.5 rounded-sm text-[10px] font-mono-technical font-semibold uppercase tracking-wider text-amber-400 flex items-center gap-1">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> active
+                                    </span>
+                                </div>
                             </div>
-                            <div class="self-center w-12 h-12 rounded-full bg-white/20 border border-white/30 flex items-center justify-center text-white cursor-pointer group-hover/p1:scale-110 transition-transform">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 ml-0.5" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
+                            <div class="p-4 space-y-3">
+                                <div>
+                                    <div class="flex justify-between items-center mb-1">
+                                        <span class="text-[10px] font-mono-technical text-accent font-bold uppercase">v2 (Latest Cut)</span>
+                                        <span class="text-[10px] font-mono-technical text-gray-500">10m ago</span>
+                                    </div>
+                                    <h4 class="text-sm font-editorial font-bold text-gray-100 truncate">Cyberpunk Commercial Ad</h4>
+                                    <p class="text-xs text-gray-400 font-mono-technical mt-1">Client: Nike Global</p>
+                                </div>
+                                <div class="pt-2 border-t border-white/5 flex justify-between items-center text-[10px] font-mono-technical text-gray-400">
+                                    <span>3 Feedback Comments</span>
+                                    <span class="text-accent font-bold">Open →</span>
+                                </div>
                             </div>
-                            <div class="w-full bg-white/10 h-1 rounded-full relative z-10"><div class="w-1/3 h-full bg-accent rounded-full"></div></div>
                         </div>
 
-                        <!-- v2 Player Box -->
-                        <div class="bg-black aspect-video rounded-xl border border-white/10 relative overflow-hidden flex flex-col justify-between p-3 group/p2">
-                            <div class="flex justify-between items-center z-10">
-                                <span class="bg-accent text-[#131313] font-bold font-mono-technical text-[10px] px-2 py-0.5 rounded uppercase">v2 (Latest Cut)</span>
-                                <span class="text-[10px] font-mono-technical text-emerald-400 font-bold">● Active Revision</span>
+                        <!-- Mock Project 2 -->
+                        <div class="glass-card bg-[#161515] border border-white/5 rounded-xl overflow-hidden hover:border-emerald-500/40 transition-all flex flex-col justify-between">
+                            <div class="h-36 bg-slate-900/80 relative flex items-center justify-center border-b border-white/5">
+                                <div class="absolute inset-0 bg-gradient-to-tr from-slate-950 via-emerald-950/40 to-slate-900"></div>
+                                <div class="w-10 h-10 rounded-full bg-emerald-400 flex items-center justify-center text-[#131313] z-10 shadow-lg">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-0.5" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
+                                </div>
+                                <div class="absolute top-2.5 right-2.5 z-10">
+                                    <span class="bg-[#131313]/90 border border-white/10 px-2 py-0.5 rounded-sm text-[10px] font-mono-technical font-semibold uppercase tracking-wider text-emerald-400 flex items-center gap-1">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> approved
+                                    </span>
+                                </div>
                             </div>
-                            <div class="self-center w-12 h-12 rounded-full bg-accent flex items-center justify-center text-[#131313] shadow-md cursor-pointer group-hover/p2:scale-110 transition-transform">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 ml-0.5" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
+                            <div class="p-4 space-y-3">
+                                <div>
+                                    <div class="flex justify-between items-center mb-1">
+                                        <span class="text-[10px] font-mono-technical text-emerald-400 font-bold uppercase">v3 (Final Cut)</span>
+                                        <span class="text-[10px] font-mono-technical text-gray-500">2h ago</span>
+                                    </div>
+                                    <h4 class="text-sm font-editorial font-bold text-gray-100 truncate">NatGeo Wildlife Doc</h4>
+                                    <p class="text-xs text-gray-400 font-mono-technical mt-1">Client: NatGeo Media</p>
+                                </div>
+                                <div class="pt-2 border-t border-white/5 flex justify-between items-center text-[10px] font-mono-technical text-emerald-400">
+                                    <span>PDF Signoff Certified</span>
+                                    <span class="font-bold">Download ↓</span>
+                                </div>
                             </div>
-                            <div class="w-full bg-white/10 h-1 rounded-full relative z-10"><div class="w-1/3 h-full bg-accent rounded-full"></div></div>
                         </div>
+
+                        <!-- Mock Project 3 -->
+                        <div class="glass-card bg-[#161515] border border-white/5 rounded-xl overflow-hidden hover:border-accent/40 transition-all flex flex-col justify-between">
+                            <div class="h-36 bg-slate-900/80 relative flex items-center justify-center border-b border-white/5">
+                                <div class="absolute inset-0 bg-gradient-to-tr from-slate-950 via-indigo-950/40 to-slate-900"></div>
+                                <div class="w-10 h-10 rounded-full bg-white/20 border border-white/30 backdrop-blur-md flex items-center justify-center text-white z-10">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-0.5" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
+                                </div>
+                                <div class="absolute top-2.5 right-2.5 z-10">
+                                    <span class="bg-[#131313]/90 border border-white/10 px-2 py-0.5 rounded-sm text-[10px] font-mono-technical font-semibold uppercase tracking-wider text-amber-400 flex items-center gap-1">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> active
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="p-4 space-y-3">
+                                <div>
+                                    <div class="flex justify-between items-center mb-1">
+                                        <span class="text-[10px] font-mono-technical text-accent font-bold uppercase">v1 (Initial Draft)</span>
+                                        <span class="text-[10px] font-mono-technical text-gray-500">1d ago</span>
+                                    </div>
+                                    <h4 class="text-sm font-editorial font-bold text-gray-100 truncate">Brand Launch Anthem</h4>
+                                    <p class="text-xs text-gray-400 font-mono-technical mt-1">Client: Universal Music</p>
+                                </div>
+                                <div class="pt-2 border-t border-white/5 flex justify-between items-center text-[10px] font-mono-technical text-gray-400">
+                                    <span>5 Feedback Comments</span>
+                                    <span class="text-accent font-bold">Open →</span>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
 
