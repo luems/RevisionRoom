@@ -18,7 +18,7 @@ const activeDraft = computed(() => {
     return props.project.drafts[currentDraftIndex.value];
 });
 
-// Auto-polling for processing drafts
+// Live polling for comments and project updates
 let pollInterval = null;
 
 const startPolling = () => {
@@ -26,13 +26,10 @@ const startPolling = () => {
     pollInterval = setInterval(() => {
         router.reload({
             only: ['project'],
-            onSuccess: () => {
-                if (activeDraft.value && activeDraft.value.status !== 'processing') {
-                    stopPolling();
-                }
-            }
+            preserveScroll: true,
+            preserveState: true,
         });
-    }, 3000);
+    }, 4000);
 };
 
 const stopPolling = () => {
@@ -42,24 +39,8 @@ const stopPolling = () => {
     }
 };
 
-watch(activeDraft, (newDraft) => {
-    if (newDraft && newDraft.status === 'processing') {
-        startPolling();
-    } else {
-        stopPolling();
-    }
-}, { immediate: true });
-
-const isVertical = ref(false);
-
-const onVideoLoaded = (e) => {
-    const video = e.target;
-    isVertical.value = video.videoHeight > video.videoWidth;
-    console.log(`[VideoLoaded] Dimensions: ${video.videoWidth}x${video.videoHeight}, isVertical: ${isVertical.value}`);
-};
-
-watch(currentDraftIndex, () => {
-    isVertical.value = false;
+onMounted(() => {
+    startPolling();
 });
 
 onUnmounted(() => {
@@ -74,12 +55,25 @@ const formatTime = (seconds) => {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 };
 
+// Video playback handlers for accurate comment timestamping
+const onVideoSeeked = () => {
+    if (videoPlayer.value) {
+        commentTime.value = videoPlayer.value.currentTime;
+    }
+};
+
+const onVideoPaused = () => {
+    if (videoPlayer.value && commentTime.value === null) {
+        commentTime.value = videoPlayer.value.currentTime;
+    }
+};
+
 // Handle comment input focus: pause video and capture time
 const handleCommentFocus = () => {
-    if (videoPlayer.value && !videoPlayer.value.paused) {
-        videoPlayer.value.pause();
-    }
-    if (videoPlayer.value && commentTime.value === null) {
+    if (videoPlayer.value) {
+        if (!videoPlayer.value.paused) {
+            videoPlayer.value.pause();
+        }
         commentTime.value = videoPlayer.value.currentTime;
     }
 };
@@ -182,6 +176,35 @@ const cancelApproval = () => {
     }
 };
 
+const deleteComment = (commentId) => {
+    if (confirm('Are you sure you want to delete this comment?')) {
+        router.delete(route('comments.destroy', commentId), {
+            preserveScroll: true,
+            onSuccess: () => {
+                console.log('[ClientPortal] Comment deleted successfully.');
+            }
+        });
+    }
+};
+
+const markingChanges = ref(false);
+const markedSuccess = ref(false);
+
+const markCurrentChanges = () => {
+    markingChanges.value = true;
+    router.post(route('projects.mark-changes', props.project.id), {}, {
+        preserveScroll: true,
+        onSuccess: () => {
+            markingChanges.value = false;
+            markedSuccess.value = true;
+            setTimeout(() => markedSuccess.value = false, 4000);
+        },
+        onError: () => {
+            markingChanges.value = false;
+        }
+    });
+};
+
 const showGuide = ref(false);
 </script>
 
@@ -218,7 +241,7 @@ const showGuide = ref(false);
                     </button>
                     
                     <button v-else-if="activeDraft && activeDraft.status === 'ready' && project.status !== 'archived'" @click="showApprovalModal = true" class="btn-primary py-1.5 px-4 text-xs">
-                        Approve Draft
+                        Approve Project
                     </button>
                 </div>
             </div>
@@ -231,7 +254,7 @@ const showGuide = ref(false);
                 <!-- Video Box -->
                 <div class="glass-card overflow-hidden">
                     <div v-if="activeDraft" class="bg-black max-h-[65vh] flex items-center justify-center relative aspect-auto">
-                        <video v-if="activeDraft.status === 'ready'" ref="videoPlayer" :src="activeDraft.video_url" @loadedmetadata="onVideoLoaded" controls class="max-w-full max-h-[65vh] object-contain"></video>
+                        <video v-if="activeDraft.status === 'ready'" ref="videoPlayer" :src="activeDraft.video_url" @loadedmetadata="onVideoLoaded" @seeked="onVideoSeeked" @pause="onVideoPaused" controls class="max-w-full max-h-[65vh] object-contain"></video>
                         <div v-else-if="activeDraft.status === 'processing'" class="text-center p-8 text-gray-400">
                             <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-indigo-500 mx-auto mb-4"></div>
                             <h4 class="font-semibold text-lg text-gray-200">Processing v{{ activeDraft.version_number }}...</h4>
@@ -384,7 +407,7 @@ const showGuide = ref(false);
                                         <span><span class="font-bold text-rose-200">Editor:</span> {{ comment.rejection_reason || 'No reason provided.' }}</span>
                                     </div>
                                 </div>
-                                <div class="shrink-0 font-semibold text-xs">
+                                <div class="shrink-0 font-semibold text-xs flex items-center gap-2">
                                     <span v-if="comment.is_resolved" class="text-emerald-400 flex items-center gap-1">
                                         ✓ Resolved
                                     </span>
@@ -394,9 +417,34 @@ const showGuide = ref(false);
                                     <span v-else class="text-amber-500 flex items-center gap-1">
                                         ○ Open
                                     </span>
+
+                                    <!-- Delete Comment Button -->
+                                    <button @click="deleteComment(comment.id)" title="Delete Comment" class="text-gray-500 hover:text-rose-400 p-1 transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
                                 </div>
                             </div>
                         </div>
+                    </div>
+
+                    <!-- Mark current changes that need to be done button -->
+                    <div v-if="activeDraft && project.status !== 'approved' && project.status !== 'archived'" class="mt-4 pt-3 border-t border-white/5 flex justify-between items-center gap-3">
+                        <span v-if="markedSuccess" class="text-xs text-emerald-400 font-mono-technical font-bold flex items-center gap-1">
+                            ✓ Marked for editor
+                        </span>
+                        <span v-else class="text-[10px] text-gray-500 font-mono-technical">
+                            Finished commenting?
+                        </span>
+                        <button 
+                            type="button" 
+                            @click="markCurrentChanges" 
+                            class="btn-secondary py-1.5 px-3 text-xs border-accent/30 text-accent hover:bg-accent/10 font-bold transition-all ml-auto"
+                            :disabled="markingChanges"
+                        >
+                            {{ markingChanges ? 'Saving...' : 'mark as current changes that need to be done' }}
+                        </button>
                     </div>
                 </div>
             </div>
@@ -416,7 +464,7 @@ const showGuide = ref(false);
                     </svg>
                 </button>
 
-                <h3 class="text-2xl font-bold mb-6 text-gray-100">Confirm Draft Approval</h3>
+                <h3 class="text-2xl font-bold mb-6 text-gray-100 font-editorial">Confirm Project Approval</h3>
                 <p class="text-sm text-gray-400 mb-4">By approving this draft, you indicate that the project is complete and ready for final delivery. The editor will be notified.</p>
 
                 <form @submit.prevent="submitApproval" class="space-y-4">

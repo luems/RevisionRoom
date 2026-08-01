@@ -50,4 +50,18 @@ class ClientPortalController extends Controller
             ] : null,
         ]);
     }
+
+    /**
+     * Mark current feedback changes as requested for the editor
+     */
+    public function markChangesRequested(Request $request, $id)
+    {
+        $project = Project::findOrFail($id);
+        if ($project->status !== 'approved' && $project->status !== 'archived') {
+            $project->status = 'active';
+        }
+        $project->touch(); // Touch updated_at so editor views catch the update
+
+        return redirect()->back()->with('success', 'Marked current changes as ready for editor.');
+    }
 }

@@ -19,7 +19,7 @@ const activeDraft = computed(() => {
     return props.project.drafts[currentDraftIndex.value];
 });
 
-// Auto-polling for processing drafts
+// Live polling for comments and project updates
 let pollInterval = null;
 
 const startPolling = () => {
@@ -27,13 +27,10 @@ const startPolling = () => {
     pollInterval = setInterval(() => {
         router.reload({
             only: ['project'],
-            onSuccess: () => {
-                if (activeDraft.value && activeDraft.value.status !== 'processing') {
-                    stopPolling();
-                }
-            }
+            preserveScroll: true,
+            preserveState: true,
         });
-    }, 3000);
+    }, 4000);
 };
 
 const stopPolling = () => {
@@ -42,13 +39,6 @@ const stopPolling = () => {
         pollInterval = null;
     }
 };
-watch(activeDraft, (newDraft) => {
-    if (newDraft && newDraft.status === 'processing') {
-        startPolling();
-    } else {
-        stopPolling();
-    }
-}, { immediate: true });
 
 const isVertical = ref(false);
 
@@ -265,10 +255,22 @@ const deleteProject = () => {
     }
 };
 
+const deleteComment = (commentId) => {
+    if (confirm('Are you sure you want to delete this comment?')) {
+        router.delete(route('comments.destroy', commentId), {
+            preserveScroll: true,
+            onSuccess: () => {
+                console.log('[ProjectView] Comment deleted successfully.');
+            }
+        });
+    }
+};
+
 onMounted(() => {
     if ('Notification' in window && Notification.permission === 'default') {
         Notification.requestPermission();
     }
+    startPolling();
 });
 </script>
 
@@ -494,6 +496,13 @@ onMounted(() => {
                                             } ${comment.is_resolved ? 'opacity-35 cursor-not-allowed' : ''}`" :title="comment.is_rejected ? 'Clear Decline' : 'Mark Not Doable'">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                                                </svg>
+                                            </button>
+
+                                            <!-- Delete Button -->
+                                            <button @click="deleteComment(comment.id)" class="p-1.5 rounded-sm border bg-slate-950 border-white/5 text-gray-500 hover:bg-rose-500/10 hover:border-rose-500/20 hover:text-rose-400 transition-all" title="Delete Comment">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                 </svg>
                                             </button>
                                         </div>

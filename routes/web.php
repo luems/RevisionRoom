@@ -39,10 +39,12 @@ Route::get('review/{share_token}/portal', [ClientPortalController::class, 'showP
 
 // Comments & Approvals (Accessible by client and editor)
 Route::post('drafts/{draft}/comments', [CommentController::class, 'store'])->name('comments.store');
+Route::delete('comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
 Route::post('comments/{comment}/resolve', [CommentController::class, 'resolve'])->name('comments.resolve');
 Route::post('comments/{comment}/reject', [CommentController::class, 'reject'])->name('comments.reject');
 Route::post('drafts/{draft}/approve', [ApprovalController::class, 'store'])->name('approvals.store');
 Route::delete('projects/{project}/cancel-approval', [ApprovalController::class, 'destroy'])->name('approvals.cancel');
+Route::post('projects/{project}/mark-changes', [ClientPortalController::class, 'markChangesRequested'])->name('projects.mark-changes');
 Route::get('projects/{project}/download-record', [ApprovalController::class, 'downloadRecord'])->name('projects.download-record');
 Route::get('drafts/{draft}/stream', [DraftController::class, 'stream'])->name('drafts.stream');
 

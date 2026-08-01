@@ -67,4 +67,12 @@ class CommentController extends Controller
 
         return redirect()->back()->with('success', $comment->is_rejected ? 'Comment marked as not doable.' : 'Rejection cleared.');
     }
+
+    public function destroy($id)
+    {
+        $comment = Comment::findOrFail($id);
+        $comment->delete();
+
+        return redirect()->back()->with('success', 'Comment deleted successfully.');
+    }
 }
