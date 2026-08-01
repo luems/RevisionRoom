@@ -188,24 +188,27 @@ const showGuide = ref(false);
 <template>
     <Head :title="`Review: ${project.name}`" />
 
-    <div class="min-h-screen bg-[#0b0f19] text-gray-100 flex flex-col justify-between">
+    <div class="min-h-screen bg-[#131313] text-gray-100 flex flex-col justify-between">
         <!-- Header -->
-        <header class="border-b border-white/5 bg-slate-900/50 backdrop-blur-md px-6 py-4 sticky top-0 z-40">
+        <header class="border-b border-white/5 bg-[#1c1b1b]/80 backdrop-blur-md px-6 py-4 sticky top-0 z-40">
             <div class="max-w-7xl mx-auto flex justify-between items-center">
                 <div class="flex items-center gap-4">
-                    <h1 class="text-xl font-black text-indigo-400 tracking-wider">REVISIONROOM</h1>
+                    <h1 class="text-2xl font-editorial font-bold text-accent tracking-tight">RevisionRoom</h1>
                     <div class="h-4 w-[1px] bg-white/10 hidden md:block"></div>
-                    <span class="text-sm font-semibold text-gray-200 hidden md:block">{{ project.name }}</span>
+                    <span class="text-xs font-mono-technical uppercase tracking-wider text-gray-400 hidden md:block">{{ project.name }}</span>
                 </div>
 
                 <div class="flex items-center gap-3">
-                    <span :class="`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
-                        project.status === 'approved' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : project.status === 'archived' ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                    <span :class="`px-2 py-0.5 rounded-sm text-[10px] font-semibold uppercase tracking-wider flex items-center gap-1.5 border ${
+                        project.status === 'approved' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : project.status === 'archived' ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
                     }`">
+                        <span :class="`w-1.5 h-1.5 rounded-full ${
+                            project.status === 'approved' ? 'bg-emerald-400' : project.status === 'archived' ? 'bg-indigo-400' : 'bg-amber-400'
+                        }`"></span>
                         {{ project.status }}
                     </span>
 
-                    <a v-if="project.status === 'approved'" :href="route('projects.download-record', project.id)" target="_blank" class="btn-primary py-1.5 px-4 text-xs flex items-center gap-1">
+                    <a v-if="project.status === 'approved' || project.status === 'archived'" :href="route('projects.download-record', project.id)" target="_blank" class="btn-secondary py-1.5 px-4 text-xs flex items-center gap-1">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
                         </svg>
@@ -216,7 +219,7 @@ const showGuide = ref(false);
                         Cancel Approval
                     </button>
                     
-                    <button v-else-if="activeDraft && activeDraft.status === 'ready' && project.status !== 'archived'" @click="showApprovalModal = true" class="btn-primary py-1.5 px-4 text-xs bg-gradient-to-r from-emerald-500 to-teal-600 shadow-emerald-500/30">
+                    <button v-else-if="activeDraft && activeDraft.status === 'ready' && project.status !== 'archived'" @click="showApprovalModal = true" class="btn-primary py-1.5 px-4 text-xs">
                         Approve Draft
                     </button>
                 </div>
@@ -244,18 +247,25 @@ const showGuide = ref(false);
                         No draft version uploaded yet.
                     </div>
 
-                    <div v-if="activeDraft" class="p-6 bg-slate-900/50 border-t border-white/5 flex justify-between items-center flex-wrap gap-4">
+                    <div v-if="activeDraft" class="p-6 bg-[#1a1a1a]/50 border-t border-white/5 flex justify-between items-center flex-wrap gap-4">
                         <div>
-                            <span class="text-xs uppercase font-bold text-indigo-400">Reviewing Version</span>
-                            <h4 class="text-lg font-bold text-gray-200">Draft v{{ activeDraft.version_number }}</h4>
+                            <span class="text-xs uppercase font-semibold text-accent font-mono-technical">Reviewing Version</span>
+                            <h4 class="text-base font-editorial font-bold text-gray-200">Draft Version v{{ activeDraft.version_number }}</h4>
                         </div>
                         <div class="flex items-center gap-2">
-                            <span class="text-xs text-gray-400">Version History:</span>
-                            <select v-model="currentDraftIndex" class="bg-slate-950 border border-white/10 rounded-lg text-xs py-1.5 px-3 text-white focus:outline-none focus:border-indigo-500">
-                                <option v-for="(draft, idx) in project.drafts" :key="draft.id" :value="idx">
-                                    v{{ draft.version_number }} ({{ draft.status }})
-                                </option>
-                            </select>
+                            <span class="text-xs text-gray-400 font-mono-technical uppercase tracking-wider">Versions:</span>
+                            <div class="flex gap-1 bg-slate-950 p-1 rounded-sm border border-white/5">
+                                <button 
+                                    v-for="(draft, idx) in project.drafts" 
+                                    :key="draft.id" 
+                                    @click="currentDraftIndex = idx" 
+                                    :class="`px-2.5 py-1 text-[10px] uppercase tracking-wider font-bold rounded-sm transition-all ${
+                                        currentDraftIndex === idx ? 'bg-accent text-[#131313]' : 'text-gray-400 hover:text-white hover:bg-white/5'
+                                    }`"
+                                >
+                                    v{{ draft.version_number }}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -263,9 +273,9 @@ const showGuide = ref(false);
                 <!-- Comment Input Area -->
                 <div v-if="activeDraft && activeDraft.status === 'ready' && project.status !== 'approved'" class="glass-card p-6">
                     <div class="flex justify-between items-center mb-3">
-                        <h3 class="font-bold text-lg">Add Feedback</h3>
-                        <button @click="showGuide = !showGuide" type="button" class="text-gray-400 hover:text-indigo-400 transition-colors p-1.5 rounded-full border border-white/10 hover:border-indigo-500/20 flex items-center justify-center h-7 w-7" title="Guide on how to comment">
-                            <span class="text-sm font-bold">?</span>
+                        <h3 class="font-bold text-sm uppercase tracking-wider font-mono-technical text-gray-400">Add Feedback</h3>
+                        <button @click="showGuide = !showGuide" type="button" class="text-gray-400 hover:text-accent transition-colors p-1.5 rounded-full border border-white/10 hover:border-accent/20 flex items-center justify-center h-7 w-7" title="Guide on how to comment">
+                            <span class="text-xs font-bold">?</span>
                         </button>
                     </div>
 
@@ -325,8 +335,8 @@ const showGuide = ref(false);
             <div class="space-y-6">
                 <div class="glass-card p-6 flex flex-col h-[600px]">
                     <div class="flex justify-between items-center border-b border-white/5 pb-4 mb-4">
-                        <h3 class="font-bold text-lg">Revision Checklist</h3>
-                        <span v-if="activeDraft" class="bg-indigo-500/10 text-indigo-400 text-xs px-2.5 py-0.5 rounded-full font-semibold">
+                        <h3 class="font-bold text-sm uppercase tracking-wider font-mono-technical text-gray-400">Feedback & Annotations</h3>
+                        <span v-if="activeDraft" class="bg-accent/10 text-accent text-xs px-2 py-0.5 rounded-sm border border-accent/20 font-bold font-mono-technical">
                             v{{ activeDraft.version_number }}
                         </span>
                     </div>
@@ -345,13 +355,13 @@ const showGuide = ref(false);
 
                     <!-- Checklist list -->
                     <div v-else class="flex-1 overflow-y-auto space-y-4 pr-2">
-                        <div v-for="comment in activeDraft.comments" :key="comment.id" :class="`p-4 rounded-xl border transition-all ${
-                            comment.is_resolved ? 'bg-emerald-950/10 border-emerald-500/10 opacity-70' : comment.is_rejected ? 'bg-rose-950/10 border-rose-500/10' : 'bg-slate-900/60 border-white/5'
+                        <div v-for="comment in activeDraft.comments" :key="comment.id" :class="`p-4 rounded-sm border transition-all ${
+                            comment.is_resolved ? 'bg-[#1a1a1a]/40 border-emerald-500/20 opacity-60' : comment.is_rejected ? 'bg-[#1a1a1a]/40 border-rose-500/20' : 'bg-[#1a1a1a] border-white/5'
                         }`">
                             <div class="flex items-start justify-between gap-3">
                                 <div>
                                     <div class="flex items-center gap-2 mb-1.5">
-                                        <span v-if="comment.timestamp_seconds !== null" @click="seekTo(comment.timestamp_seconds)" class="bg-indigo-500/20 text-indigo-300 font-mono text-xs px-2 py-0.5 rounded cursor-pointer hover:bg-indigo-500 hover:text-white transition-all">
+                                        <span v-if="comment.timestamp_seconds !== null" @click="seekTo(comment.timestamp_seconds)" class="font-mono-technical bg-white/5 border border-white/5 text-gray-300 text-[10px] px-1.5 py-0.5 rounded-sm hover:border-accent hover:text-accent transition-all cursor-pointer">
                                             {{ formatTime(comment.timestamp_seconds) }}
                                         </span>
                                         <span class="text-xs text-gray-400 font-bold">{{ comment.author_name }}</span>

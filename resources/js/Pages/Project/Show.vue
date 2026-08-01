@@ -207,17 +207,20 @@ const deleteProject = () => {
 
     <AuthenticatedLayout>
         <template #header>
-            <div class="flex justify-between items-center flex-wrap gap-4">
+            <div class="flex justify-between items-center flex-wrap gap-4 border-b border-white/5 pb-6">
                 <div>
                     <div class="flex items-center gap-3">
-                        <h2 class="text-2xl font-bold text-gray-100">{{ project.name }}</h2>
-                        <span :class="`px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider ${
-                            project.status === 'approved' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                        <h2 class="text-3xl font-editorial tracking-tight text-gray-100">Project: {{ project.name }}</h2>
+                        <span :class="`px-2 py-0.5 rounded-sm text-[10px] font-semibold uppercase tracking-wider flex items-center gap-1.5 border ${
+                            project.status === 'approved' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : project.status === 'archived' ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
                         }`">
+                            <span :class="`w-1.5 h-1.5 rounded-full ${
+                                project.status === 'approved' ? 'bg-emerald-400' : project.status === 'archived' ? 'bg-indigo-400' : 'bg-amber-400'
+                            }`"></span>
                             {{ project.status }}
                         </span>
                     </div>
-                    <p class="text-gray-400 text-sm mt-1">{{ project.description || 'No description' }}</p>
+                    <p class="text-xs text-gray-400 mt-1.5 font-mono-technical uppercase tracking-wider">{{ project.description || 'No description provided' }}</p>
                 </div>
 
                 <div class="flex gap-3">
@@ -259,18 +262,18 @@ const deleteProject = () => {
                 <!-- Client Access Link Box -->
                 <div class="glass-card p-6 flex justify-between items-center flex-wrap gap-4">
                     <div class="flex items-center gap-3">
-                        <div class="p-3 bg-indigo-500/10 rounded-xl text-indigo-400">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <div class="p-2.5 bg-accent/10 rounded-sm text-accent">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                             </svg>
                         </div>
                         <div>
-                            <h4 class="font-bold text-gray-200">Secure Client Access</h4>
-                            <p class="text-xs text-gray-400">Send this magic URL to client <span class="text-indigo-300 font-semibold">{{ project.client?.name }}</span> to review and approve drafts.</p>
+                            <h4 class="font-bold text-gray-200">Secure Client Access Link</h4>
+                            <p class="text-xs text-gray-400">Share this magic URL with client <span class="text-accent font-mono-technical font-bold">{{ project.client?.name }}</span> to review and approve drafts.</p>
                         </div>
                     </div>
-                    <div class="flex items-center gap-2 bg-slate-950 p-1.5 rounded-xl border border-white/5 w-full md:w-auto">
-                        <span class="text-xs text-gray-400 px-3 truncate max-w-md">{{ shareUrl }}</span>
+                    <div class="flex items-center gap-2 bg-slate-950 p-1.5 rounded-sm border border-white/5 w-full md:w-auto">
+                        <span class="text-xs text-gray-400 px-3 truncate max-w-md font-mono-technical">{{ shareUrl }}</span>
                         <button @click="copyShareLink" class="btn-primary py-1.5 px-4 text-xs">
                             {{ copied ? 'Copied!' : 'Copy Link' }}
                         </button>
@@ -306,18 +309,25 @@ const deleteProject = () => {
                                 <p class="text-sm text-gray-400 mt-1 mb-4">Upload your first draft version to get started.</p>
                             </div>
 
-                            <div v-if="activeDraft" class="p-6 bg-slate-900/50 border-t border-white/5 flex justify-between items-center">
+                            <div v-if="activeDraft" class="p-6 bg-[#1a1a1a]/50 border-t border-white/5 flex justify-between items-center flex-wrap gap-4">
                                 <div>
-                                    <span class="text-xs uppercase font-semibold text-indigo-400">Current View</span>
-                                    <h4 class="text-lg font-bold text-gray-200">Draft Version {{ activeDraft.version_number }}</h4>
+                                    <span class="text-xs uppercase font-semibold text-accent font-mono-technical">Active Draft View</span>
+                                    <h4 class="text-base font-editorial font-bold text-gray-200">Draft Version {{ activeDraft.version_number }}</h4>
                                 </div>
                                 <div class="flex items-center gap-2">
-                                    <span class="text-xs text-gray-400">Select Draft:</span>
-                                    <select v-model="currentDraftIndex" class="bg-slate-950 border border-white/10 rounded-lg text-xs py-1.5 px-3 text-white focus:outline-none focus:border-indigo-500">
-                                        <option v-for="(draft, idx) in project.drafts" :key="draft.id" :value="idx">
-                                            v{{ draft.version_number }} ({{ draft.status }})
-                                        </option>
-                                    </select>
+                                    <span class="text-xs text-gray-400 font-mono-technical uppercase tracking-wider">Versions:</span>
+                                    <div class="flex gap-1 bg-slate-950 p-1 rounded-sm border border-white/5">
+                                        <button 
+                                            v-for="(draft, idx) in project.drafts" 
+                                            :key="draft.id" 
+                                            @click="currentDraftIndex = idx" 
+                                            :class="`px-2.5 py-1 text-[10px] uppercase tracking-wider font-bold rounded-sm transition-all ${
+                                                currentDraftIndex === idx ? 'bg-accent text-[#131313]' : 'text-gray-400 hover:text-white hover:bg-white/5'
+                                            }`"
+                                        >
+                                            v{{ draft.version_number }}
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -349,8 +359,8 @@ const deleteProject = () => {
                     <div class="space-y-6">
                         <div class="glass-card p-6 flex flex-col h-[550px]">
                             <div class="flex justify-between items-center border-b border-white/5 pb-4 mb-4">
-                                <h3 class="font-bold text-lg">Revision Checklist</h3>
-                                <span v-if="activeDraft" class="bg-indigo-500/10 text-indigo-400 text-xs px-2.5 py-0.5 rounded-full font-semibold">
+                                <h3 class="font-bold text-sm uppercase tracking-wider font-mono-technical text-gray-400">Feedback & Annotations</h3>
+                                <span v-if="activeDraft" class="bg-accent/10 text-accent text-xs px-2 py-0.5 rounded-sm border border-accent/20 font-bold font-mono-technical">
                                     v{{ activeDraft.version_number }}
                                 </span>
                             </div>
@@ -368,13 +378,13 @@ const deleteProject = () => {
                             </div>
 
                             <div v-else class="flex-1 overflow-y-auto space-y-4 pr-2">
-                                <div v-for="comment in activeDraft.comments" :key="comment.id" :class="`p-4 rounded-xl border transition-all duration-200 ${
-                                    comment.is_resolved ? 'bg-slate-900/30 border-emerald-500/10 opacity-70' : comment.is_rejected ? 'bg-slate-900/40 border-rose-500/10' : 'bg-slate-900/60 border-white/5'
+                                <div v-for="comment in activeDraft.comments" :key="comment.id" :class="`p-4 rounded-sm border transition-all duration-200 ${
+                                    comment.is_resolved ? 'bg-[#1a1a1a]/40 border-emerald-500/20 opacity-60' : comment.is_rejected ? 'bg-[#1a1a1a]/40 border-rose-500/20' : 'bg-[#1a1a1a] border-white/5'
                                 }`">
                                     <div class="flex items-start justify-between gap-3">
                                         <div class="flex-1">
                                             <div class="flex items-center gap-2 mb-1.5">
-                                                <span v-if="comment.timestamp_seconds !== null" @click="jumpToTime(comment.timestamp_seconds)" class="bg-indigo-500/20 text-indigo-300 font-mono text-xs px-2 py-0.5 rounded cursor-pointer hover:bg-indigo-500 hover:text-white transition-all">
+                                                <span v-if="comment.timestamp_seconds !== null" @click="jumpToTime(comment.timestamp_seconds)" class="font-mono-technical bg-white/5 border border-white/5 text-gray-300 text-[10px] px-1.5 py-0.5 rounded-sm hover:border-accent hover:text-accent transition-all cursor-pointer">
                                                     {{ formatTime(comment.timestamp_seconds) }}
                                                 </span>
                                                 <span class="text-xs text-gray-400 font-bold">{{ comment.author_name }}</span>
@@ -402,20 +412,20 @@ const deleteProject = () => {
 
                                         <div class="flex items-center gap-1.5">
                                             <!-- Resolve Button -->
-                                            <button @click="resolveComment(comment.id, !comment.is_resolved)" :disabled="comment.is_rejected" :class="`p-1.5 rounded-lg border transition-all ${
+                                            <button @click="resolveComment(comment.id, !comment.is_resolved)" :disabled="comment.is_rejected" :class="`p-1.5 rounded-sm border transition-all ${
                                                 comment.is_resolved ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400 hover:bg-red-500/10 hover:border-red-500/20 hover:text-red-400' : 'bg-slate-950 border-white/5 text-gray-500 hover:bg-emerald-500/10 hover:border-emerald-500/20 hover:text-emerald-400'
                                             } ${comment.is_rejected ? 'opacity-35 cursor-not-allowed' : ''}`" :title="comment.is_resolved ? 'Mark Unresolved' : 'Mark Resolved'">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
                                                 </svg>
                                             </button>
                                             
                                             <!-- Reject Button -->
-                                            <button @click="promptRejection(comment)" :disabled="comment.is_resolved" :class="`p-1.5 rounded-lg border transition-all ${
+                                            <button @click="promptRejection(comment)" :disabled="comment.is_resolved" :class="`p-1.5 rounded-sm border transition-all ${
                                                 comment.is_rejected ? 'bg-rose-500/15 border-rose-500/30 text-rose-400 hover:bg-slate-950 hover:border-white/5 hover:text-gray-500' : 'bg-slate-950 border-white/5 text-gray-500 hover:bg-rose-500/10 hover:border-rose-500/20 hover:text-rose-400'
                                             } ${comment.is_resolved ? 'opacity-35 cursor-not-allowed' : ''}`" :title="comment.is_rejected ? 'Clear Decline' : 'Mark Not Doable'">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
                                                 </svg>
                                             </button>
                                         </div>
