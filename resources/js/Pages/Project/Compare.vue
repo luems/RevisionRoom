@@ -24,11 +24,13 @@ const bothLoaded = computed(() => p1Loaded.value && p2Loaded.value);
 
 const p1Buffering = ref(false);
 const p2Buffering = ref(false);
-const isBuffering = computed(() => p1Buffering.value || p2Buffering.value);
+const isRecoveringSync = ref(false);
+const isBuffering = computed(() => p1Buffering.value || p2Buffering.value || isRecoveringSync.value);
 const bufferingLabel = computed(() => {
     if (p1Buffering.value && p2Buffering.value) return 'Both versions buffering…';
     if (p1Buffering.value) return `v${props.draft1?.version_number} is buffering…`;
     if (p2Buffering.value) return `v${props.draft2?.version_number} is buffering…`;
+    if (isRecoveringSync.value) return 'Re-synchronizing both versions…';
     return '';
 });
 
@@ -58,67 +60,189 @@ const handleTimeUpdate = () => {
     }
 };
 
-// === Sync Correction (smart — pauses on heavy drift instead of looping) ===
-let syncInterval = null;
-let wasPlayingBeforeBuffer = false;
+// === Frame-level synchronization ===
+// Seeking is asynchronous. Playback must not resume until both seeks have
+// completed and both decoders have enough data for the next frame.
+const SOFT_DRIFT_SECONDS = 0.025;
+const HARD_DRIFT_SECONDS = 0.08;
+const PLAYBACK_RATE_ADJUSTMENT = 0.05;
+let syncAnimationFrame = null;
+let syncOperation = 0;
+
+const pauseBoth = () => {
+    player1.value?.pause();
+    player2.value?.pause();
+};
+
+const resetPlaybackRates = () => {
+    if (player1.value) player1.value.playbackRate = 1;
+    if (player2.value) player2.value.playbackRate = 1;
+};
+
+const clampToPlayerDuration = (player, time) => {
+    if (!Number.isFinite(player.duration)) return Math.max(0, time);
+    return Math.min(Math.max(0, time), player.duration);
+};
+
+const seekAndWait = (player, time) => {
+    const target = clampToPlayerDuration(player, time);
+
+    if (!player.seeking && Math.abs(player.currentTime - target) <= 0.005) {
+        return Promise.resolve();
+    }
+
+    return new Promise((resolve, reject) => {
+        const cleanup = () => {
+            player.removeEventListener('seeked', handleSeeked);
+            player.removeEventListener('error', handleError);
+        };
+        const handleSeeked = () => {
+            cleanup();
+            resolve();
+        };
+        const handleError = () => {
+            cleanup();
+            reject(new Error('Video seek failed.'));
+        };
+
+        player.addEventListener('seeked', handleSeeked);
+        player.addEventListener('error', handleError);
+        player.currentTime = target;
+    });
+};
+
+const waitUntilPlayable = (player) => {
+    // HAVE_FUTURE_DATA: the current frame and at least the next are available.
+    if (player.readyState >= 3) return Promise.resolve();
+
+    return new Promise((resolve, reject) => {
+        const cleanup = () => {
+            player.removeEventListener('canplay', handleCanPlay);
+            player.removeEventListener('error', handleError);
+        };
+        const handleCanPlay = () => {
+            cleanup();
+            resolve();
+        };
+        const handleError = () => {
+            cleanup();
+            reject(new Error('Video buffering failed.'));
+        };
+
+        player.addEventListener('canplay', handleCanPlay);
+        player.addEventListener('error', handleError);
+    });
+};
+
+const startTogetherAt = async (time, operation) => {
+    const first = player1.value;
+    const second = player2.value;
+    if (!first || !second) return false;
+
+    pauseBoth();
+    resetPlaybackRates();
+
+    await Promise.all([
+        seekAndWait(first, time),
+        seekAndWait(second, time),
+    ]);
+    await Promise.all([
+        waitUntilPlayable(first),
+        waitUntilPlayable(second),
+    ]);
+
+    // Manual pause, end, or unmount invalidates an in-flight recovery.
+    if (operation !== syncOperation || !isPlaying.value) return false;
+
+    p1Buffering.value = false;
+    p2Buffering.value = false;
+
+    // Invoke both play calls in the same task, after the shared seek barrier.
+    const firstPlay = first.play();
+    const secondPlay = second.play();
+    await Promise.all([firstPlay, secondPlay]);
+
+    return operation === syncOperation && isPlaying.value;
+};
+
+const recoverSynchronization = async (showNotice = false) => {
+    if (isRecoveringSync.value || !isPlaying.value || !player1.value || !player2.value) return;
+
+    const operation = ++syncOperation;
+    // Rewind to the lagging video rather than skipping it into unbuffered data.
+    const sharedTime = Math.min(player1.value.currentTime, player2.value.currentTime);
+    isRecoveringSync.value = true;
+    pauseBoth();
+
+    try {
+        const resumed = await startTogetherAt(sharedTime, operation);
+        if (resumed && showNotice) {
+            showDesyncNotice('Playback was out of sync and has been re-synchronized.');
+        }
+    } catch (error) {
+        if (operation === syncOperation) {
+            isPlaying.value = false;
+            pauseBoth();
+            showDesyncNotice('Synchronized playback could not resume. Press play to try again.');
+            console.error('[CompareView] Synchronization recovery failed:', error);
+        }
+    } finally {
+        if (operation === syncOperation) {
+            isRecoveringSync.value = false;
+        }
+    }
+};
+
+const handleBufferStart = (playerNumber) => {
+    if (playerNumber === 1) p1Buffering.value = true;
+    if (playerNumber === 2) p2Buffering.value = true;
+
+    // Pause the healthy player immediately; polling allows it to run ahead.
+    if (isPlaying.value && !isRecoveringSync.value) {
+        pauseBoth();
+        recoverSynchronization();
+    }
+};
+
+const monitorSynchronization = () => {
+    syncAnimationFrame = requestAnimationFrame(monitorSynchronization);
+
+    const first = player1.value;
+    const second = player2.value;
+    if (!first || !second || !isPlaying.value || isRecoveringSync.value || isBuffering.value) return;
+
+    const signedDrift = second.currentTime - first.currentTime;
+    const drift = Math.abs(signedDrift);
+
+    if (drift >= HARD_DRIFT_SECONDS) {
+        recoverSynchronization(true);
+        return;
+    }
+
+    // Gently converge sub-frame drift without repeated disruptive seeks.
+    if (drift > SOFT_DRIFT_SECONDS) {
+        second.playbackRate = signedDrift > 0
+            ? 1 - PLAYBACK_RATE_ADJUSTMENT
+            : 1 + PLAYBACK_RATE_ADJUSTMENT;
+    } else if (second.playbackRate !== 1) {
+        second.playbackRate = 1;
+    }
+};
 
 const startSyncCorrection = () => {
-    if (syncInterval) return;
-    syncInterval = setInterval(() => {
-        if (!player1.value || !player2.value) return;
-        if (!isPlaying.value) return;
-
-        // If either player is buffering, pause both and wait
-        if (isBuffering.value) {
-            if (!wasPlayingBeforeBuffer) {
-                wasPlayingBeforeBuffer = true;
-                player1.value.pause();
-                player2.value.pause();
-            }
-            return;
-        }
-
-        // If we were paused due to buffering, resume together
-        if (wasPlayingBeforeBuffer) {
-            wasPlayingBeforeBuffer = false;
-            // Snap player2 to player1 before resuming
-            player2.value.currentTime = player1.value.currentTime;
-            player1.value.play().catch(() => {});
-            player2.value.play().catch(() => {});
-            return;
-        }
-
-        const drift = Math.abs(player1.value.currentTime - player2.value.currentTime);
-        
-        // Minor drift (<0.3s): silently correct
-        if (drift > 0.15 && drift <= 0.5) {
-            player2.value.currentTime = player1.value.currentTime;
-        }
-        // Major drift (>0.5s): pause, re-sync, notify user, resume
-        else if (drift > 0.5) {
-            player1.value.pause();
-            player2.value.pause();
-            player2.value.currentTime = player1.value.currentTime;
-
-            showDesyncNotice('Playback was out of sync and has been re-synchronized.');
-
-            // Small delay to let seek settle, then resume
-            setTimeout(() => {
-                if (isPlaying.value) {
-                    player1.value.play().catch(() => {});
-                    player2.value.play().catch(() => {});
-                }
-            }, 150);
-        }
-    }, 500);
+    if (syncAnimationFrame === null) {
+        syncAnimationFrame = requestAnimationFrame(monitorSynchronization);
+    }
 };
 
 const stopSyncCorrection = () => {
-    if (syncInterval) {
-        clearInterval(syncInterval);
-        syncInterval = null;
+    if (syncAnimationFrame !== null) {
+        cancelAnimationFrame(syncAnimationFrame);
+        syncAnimationFrame = null;
     }
-    wasPlayingBeforeBuffer = false;
+    ++syncOperation;
+    isRecoveringSync.value = false;
+    resetPlaybackRates();
 };
 
 // Play / Pause Master Control
@@ -134,13 +258,20 @@ const togglePlay = () => {
     } else {
         // Sync player2 to player1 before starting
         player2.value.currentTime = player1.value.currentTime;
+        resetPlaybackRates();
+        const operation = ++syncOperation;
+        isPlaying.value = true;
 
-        const p1 = player1.value.play().catch(() => {});
-        const p2 = player2.value.play().catch(() => {});
+        const p1 = player1.value.play();
+        const p2 = player2.value.play();
+        startSyncCorrection();
 
-        Promise.all([p1, p2]).then(() => {
-            isPlaying.value = true;
-            startSyncCorrection();
+        Promise.all([p1, p2]).catch((error) => {
+            if (operation !== syncOperation) return;
+            isPlaying.value = false;
+            stopSyncCorrection();
+            pauseBoth();
+            console.error('[CompareView] Synchronized playback failed to start:', error);
         });
     }
 };
@@ -230,7 +361,8 @@ onMounted(() => {
             player1.value.addEventListener('ended', handleEnded);
             
             // Buffering events
-            player1.value.addEventListener('waiting', () => { p1Buffering.value = true; });
+            player1.value.addEventListener('waiting', () => handleBufferStart(1));
+            player1.value.addEventListener('stalled', () => handleBufferStart(1));
             player1.value.addEventListener('playing', () => { p1Buffering.value = false; });
             player1.value.addEventListener('canplay', () => { p1Buffering.value = false; });
 
@@ -247,7 +379,8 @@ onMounted(() => {
             player2.value.addEventListener('ended', handleEnded);
             
             // Buffering events
-            player2.value.addEventListener('waiting', () => { p2Buffering.value = true; });
+            player2.value.addEventListener('waiting', () => handleBufferStart(2));
+            player2.value.addEventListener('stalled', () => handleBufferStart(2));
             player2.value.addEventListener('playing', () => { p2Buffering.value = false; });
             player2.value.addEventListener('canplay', () => { p2Buffering.value = false; });
 
