@@ -1,386 +1,346 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3';
+import { ref } from 'vue';
 
 defineProps({
-    canLogin: {
-        type: Boolean,
-    },
-    canRegister: {
-        type: Boolean,
-    },
-    laravelVersion: {
-        type: String,
-        required: true,
-    },
-    phpVersion: {
-        type: String,
-        required: true,
-    },
+    canLogin: Boolean,
+    canRegister: Boolean,
+    auth_user: Object,
 });
 
-function handleImageError() {
-    document.getElementById('screenshot-container')?.classList.add('!hidden');
-    document.getElementById('docs-card')?.classList.add('!row-span-1');
-    document.getElementById('docs-card-content')?.classList.add('!flex-row');
-    document.getElementById('background')?.classList.add('!hidden');
-}
+const activeTab = ref('sync');
 </script>
 
 <template>
-    <Head title="Welcome" />
-    <div class="bg-gray-50 text-black/50 dark:bg-black dark:text-white/50">
-        <img
-            id="background"
-            class="absolute -left-20 top-0 max-w-[877px]"
-            src="https://laravel.com/assets/img/welcome/background.svg"
-        />
-        <div
-            class="relative flex min-h-screen flex-col items-center justify-center selection:bg-[#FF2D20] selection:text-white"
-        >
-            <div class="relative w-full max-w-2xl px-6 lg:max-w-7xl">
-                <header
-                    class="grid grid-cols-2 items-center gap-2 py-10 lg:grid-cols-3"
-                >
-                    <div class="flex lg:col-start-2 lg:justify-center">
-                        <svg
-                            class="h-12 w-auto text-white lg:h-16 lg:text-[#FF2D20]"
-                            viewBox="0 0 62 65"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                        >
-                            <path
-                                d="M61.8548 14.6253C61.8778 14.7102 61.8895 14.7978 61.8897 14.8858V28.5615C61.8898 28.737 61.8434 28.9095 61.7554 29.0614C61.6675 29.2132 61.5409 29.3392 61.3887 29.4265L49.9104 36.0351V49.1337C49.9104 49.4902 49.7209 49.8192 49.4118 49.9987L25.4519 63.7916C25.3971 63.8227 25.3372 63.8427 25.2774 63.8639C25.255 63.8714 25.2338 63.8851 25.2101 63.8913C25.0426 63.9354 24.8666 63.9354 24.6991 63.8913C24.6716 63.8838 24.6467 63.8689 24.6205 63.8589C24.5657 63.8389 24.5084 63.8215 24.456 63.7916L0.501061 49.9987C0.348882 49.9113 0.222437 49.7853 0.134469 49.6334C0.0465019 49.4816 0.000120578 49.3092 0 49.1337L0 8.10652C0 8.01678 0.0124642 7.92953 0.0348998 7.84477C0.0423783 7.8161 0.0598282 7.78993 0.0697995 7.76126C0.0884958 7.70891 0.105946 7.65531 0.133367 7.6067C0.152063 7.5743 0.179485 7.54812 0.20192 7.51821C0.230588 7.47832 0.256763 7.43719 0.290416 7.40229C0.319084 7.37362 0.356476 7.35243 0.388883 7.32751C0.425029 7.29759 0.457436 7.26518 0.498568 7.2415L12.4779 0.345059C12.6296 0.257786 12.8015 0.211853 12.9765 0.211853C13.1515 0.211853 13.3234 0.257786 13.475 0.345059L25.4531 7.2415H25.4556C25.4955 7.26643 25.5292 7.29759 25.5653 7.32626C25.5977 7.35119 25.6339 7.37362 25.6625 7.40104C25.6974 7.43719 25.7224 7.47832 25.7523 7.51821C25.7735 7.54812 25.8021 7.5743 25.8196 7.6067C25.8483 7.65656 25.8645 7.70891 25.8844 7.76126C25.8944 7.78993 25.9118 7.8161 25.9193 7.84602C25.9423 7.93096 25.954 8.01853 25.9542 8.10652V33.7317L35.9355 27.9844V14.8846C35.9355 14.7973 35.948 14.7088 35.9704 14.6253C35.9792 14.5954 35.9954 14.5692 36.0053 14.5405C36.0253 14.4882 36.0427 14.4346 36.0702 14.386C36.0888 14.3536 36.1163 14.3274 36.1375 14.2975C36.1674 14.2576 36.1923 14.2165 36.2272 14.1816C36.2559 14.1529 36.292 14.1317 36.3244 14.1068C36.3618 14.0769 36.3942 14.0445 36.4341 14.0208L48.4147 7.12434C48.5663 7.03694 48.7383 6.99094 48.9133 6.99094C49.0883 6.99094 49.2602 7.03694 49.4118 7.12434L61.3899 14.0208C61.4323 14.0457 61.4647 14.0769 61.5021 14.1055C61.5333 14.1305 61.5694 14.1529 61.5981 14.1803C61.633 14.2165 61.6579 14.2576 61.6878 14.2975C61.7103 14.3274 61.7377 14.3536 61.7551 14.386C61.7838 14.4346 61.8 14.4882 61.8199 14.5405C61.8312 14.5692 61.8474 14.5954 61.8548 14.6253ZM59.893 27.9844V16.6121L55.7013 19.0252L49.9104 22.3593V33.7317L59.8942 27.9844H59.893ZM47.9149 48.5566V37.1768L42.2187 40.4299L25.953 49.7133V61.2003L47.9149 48.5566ZM1.99677 9.83281V48.5566L23.9562 61.199V49.7145L12.4841 43.2219L12.4804 43.2194L12.4754 43.2169C12.4368 43.1945 12.4044 43.1621 12.3682 43.1347C12.3371 43.1097 12.3009 43.0898 12.2735 43.0624L12.271 43.0586C12.2386 43.0275 12.2162 42.9888 12.1887 42.9539C12.1638 42.9203 12.1339 42.8916 12.114 42.8567L12.1127 42.853C12.0903 42.8156 12.0766 42.7707 12.0604 42.7283C12.0442 42.6909 12.023 42.656 12.013 42.6161C12.0005 42.5688 11.998 42.5177 11.9931 42.4691C11.9881 42.4317 11.9781 42.3943 11.9781 42.3569V15.5801L6.18848 12.2446L1.99677 9.83281ZM12.9777 2.36177L2.99764 8.10652L12.9752 13.8513L22.9541 8.10527L12.9752 2.36177H12.9777ZM18.1678 38.2138L23.9574 34.8809V9.83281L19.7657 12.2459L13.9749 15.5801V40.6281L18.1678 38.2138ZM48.9133 9.14105L38.9344 14.8858L48.9133 20.6305L58.8909 14.8846L48.9133 9.14105ZM47.9149 22.3593L42.124 19.0252L37.9323 16.6121V27.9844L43.7219 31.3174L47.9149 33.7317V22.3593ZM24.9533 47.987L39.59 39.631L46.9065 35.4555L36.9352 29.7145L25.4544 36.3242L14.9907 42.3482L24.9533 47.987Z"
-                                fill="currentColor"
-                            />
-                        </svg>
+    <Head title="RevisionRoom — Next-Gen Video Review & Client Approval Platform" />
+
+    <div class="min-h-screen bg-[#131313] text-gray-100 font-sans selection:bg-accent selection:text-[#131313] relative overflow-hidden">
+        
+        <!-- Ambient Glowing Background Blobs -->
+        <div class="absolute top-[-10%] left-[20%] w-[500px] h-[500px] bg-accent/10 rounded-full blur-[140px] pointer-events-none"></div>
+        <div class="absolute top-[40%] right-[-10%] w-[600px] h-[600px] bg-indigo-600/10 rounded-full blur-[160px] pointer-events-none"></div>
+        <div class="absolute bottom-[-10%] left-[30%] w-[450px] h-[450px] bg-emerald-500/10 rounded-full blur-[150px] pointer-events-none"></div>
+
+        <!-- Sticky Header Navigation -->
+        <header class="border-b border-white/5 bg-[#1c1b1b]/80 backdrop-blur-xl px-6 py-4 sticky top-0 z-50">
+            <div class="max-w-7xl mx-auto flex justify-between items-center">
+                
+                <!-- Logo -->
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-lg bg-accent flex items-center justify-center text-[#131313] font-black text-lg shadow-[0_0_20px_rgba(203,251,69,0.4)]">
+                        R
                     </div>
-                    <nav v-if="canLogin" class="-mx-3 flex flex-1 justify-end">
-                        <Link
-                            v-if="$page.props.auth.user"
-                            :href="route('dashboard')"
-                            class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#FF2D20] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white"
-                        >
-                            Dashboard
+                    <div>
+                        <span class="text-xl font-editorial font-bold text-gray-100 tracking-tight">RevisionRoom</span>
+                        <span class="ml-2 text-[9px] font-mono-technical uppercase tracking-widest text-accent bg-accent/10 border border-accent/20 px-1.5 py-0.5 rounded-sm">V2.0 PRO</span>
+                    </div>
+                </div>
+
+                <!-- Navigation Links -->
+                <nav class="hidden md:flex items-center gap-8 text-xs font-mono-technical uppercase tracking-wider text-gray-400">
+                    <a href="#features" class="hover:text-accent transition-colors">Features</a>
+                    <a href="#compare" class="hover:text-accent transition-colors">Sync Player</a>
+                    <a href="#workflow" class="hover:text-accent transition-colors">Workflow</a>
+                    <a href="#security" class="hover:text-accent transition-colors">Security</a>
+                </nav>
+
+                <!-- Action Buttons -->
+                <div class="flex items-center gap-3">
+                    <template v-if="auth_user">
+                        <Link :href="route('dashboard')" class="btn-primary py-2 px-5 text-xs flex items-center gap-2">
+                            <span>Go to Dashboard</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                            </svg>
                         </Link>
+                    </template>
+                    <template v-else>
+                        <Link :href="route('login')" class="btn-secondary py-2 px-4 text-xs">
+                            Sign In
+                        </Link>
+                        <Link v-if="canRegister" :href="route('register')" class="btn-primary py-2 px-5 text-xs">
+                            Start Free Trial
+                        </Link>
+                    </template>
+                </div>
+            </div>
+        </header>
 
-                        <template v-else>
-                            <Link
-                                :href="route('login')"
-                                class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#FF2D20] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white"
-                            >
-                                Log in
-                            </Link>
+        <!-- Hero Section -->
+        <section class="relative pt-20 pb-16 px-6 max-w-7xl mx-auto text-center space-y-8 z-10">
+            <!-- Pill Announcement Badge -->
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-mono-technical text-gray-300 backdrop-blur-md shadow-inner">
+                <span class="w-2 h-2 rounded-full bg-accent animate-ping"></span>
+                <span>Introducing Synchronized Dual-Player Comparison</span>
+                <span class="text-accent font-bold">New ✨</span>
+            </div>
 
-                            <Link
-                                v-if="canRegister"
-                                :href="route('register')"
-                                class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#FF2D20] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white"
-                            >
-                                Register
-                            </Link>
-                        </template>
-                    </nav>
-                </header>
+            <!-- Main Headline -->
+            <h1 class="text-4xl sm:text-6xl lg:text-7xl font-editorial font-bold text-gray-100 tracking-tight leading-[1.1] max-w-5xl mx-auto">
+                Frame-Accurate Video Review & <br class="hidden sm:block" />
+                <span class="bg-gradient-to-r from-accent via-emerald-400 to-indigo-400 bg-clip-text text-transparent">Instant Client Approvals</span>
+            </h1>
 
-                <main class="mt-6">
-                    <div class="grid gap-6 lg:grid-cols-2 lg:gap-8">
-                        <a
-                            href="https://laravel.com/docs"
-                            id="docs-card"
-                            class="flex flex-col items-start gap-6 overflow-hidden rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] transition duration-300 hover:text-black/70 hover:ring-black/20 focus:outline-none focus-visible:ring-[#FF2D20] md:row-span-3 lg:p-10 lg:pb-10 dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:text-white/70 dark:hover:ring-zinc-700 dark:focus-visible:ring-[#FF2D20]"
-                        >
-                            <div
-                                id="screenshot-container"
-                                class="relative flex w-full flex-1 items-stretch"
-                            >
-                                <img
-                                    src="https://laravel.com/assets/img/welcome/docs-light.svg"
-                                    alt="Laravel documentation screenshot"
-                                    class="aspect-video h-full w-full flex-1 rounded-[10px] object-cover object-top drop-shadow-[0px_4px_34px_rgba(0,0,0,0.06)] dark:hidden"
-                                    @error="handleImageError"
-                                />
-                                <img
-                                    src="https://laravel.com/assets/img/welcome/docs-dark.svg"
-                                    alt="Laravel documentation screenshot"
-                                    class="hidden aspect-video h-full w-full flex-1 rounded-[10px] object-cover object-top drop-shadow-[0px_4px_34px_rgba(0,0,0,0.25)] dark:block"
-                                />
-                                <div
-                                    class="absolute -bottom-16 -left-16 h-40 w-[calc(100%+8rem)] bg-gradient-to-b from-transparent via-white to-white dark:via-zinc-900 dark:to-zinc-900"
-                                ></div>
+            <!-- Subtitle -->
+            <p class="text-base sm:text-lg text-gray-400 max-w-2xl mx-auto font-sans leading-relaxed">
+                Eliminate endless email threads and vague feedback. Share magic review links, compare version drafts side-by-side with synchronized playback, and export legally verified PDF sign-offs.
+            </p>
+
+            <!-- CTA Action Buttons -->
+            <div class="flex items-center justify-center gap-4 flex-wrap pt-2">
+                <Link v-if="!auth_user" :href="route('register')" class="btn-primary py-3.5 px-8 text-sm flex items-center gap-2 text-[#131313] font-bold shadow-[0_0_30px_rgba(203,251,69,0.3)] hover:scale-105 transition-transform">
+                    <span>Create Free Workspace</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                </Link>
+                <Link v-else :href="route('dashboard')" class="btn-primary py-3.5 px-8 text-sm flex items-center gap-2 text-[#131313] font-bold shadow-[0_0_30px_rgba(203,251,69,0.3)] hover:scale-105 transition-transform">
+                    <span>Open Editor Dashboard</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                </Link>
+                <a href="#features" class="btn-secondary py-3.5 px-7 text-sm flex items-center gap-2 border-white/10 hover:border-white/20">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>Explore Features</span>
+                </a>
+            </div>
+
+            <!-- Feature Badges Bar -->
+            <div class="pt-8 border-t border-white/5 max-w-4xl mx-auto flex items-center justify-center gap-6 sm:gap-12 flex-wrap text-xs font-mono-technical text-gray-400 uppercase tracking-wider">
+                <div class="flex items-center gap-2">
+                    <span class="text-accent font-bold">⚡</span> FFmpeg Transcoding
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-emerald-400 font-bold">🎞️</span> Frame-Exact Timestamps
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-indigo-400 font-bold">🔄</span> Dual Sync Comparison
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-sky-400 font-bold">📄</span> PDF Audit Certificates
+                </div>
+            </div>
+        </section>
+
+        <!-- Interactive Mockup Showcase Section -->
+        <section class="py-12 px-6 max-w-7xl mx-auto relative z-10">
+            <div class="glass-card p-3 sm:p-6 bg-[#1a1a1a]/60 border border-white/10 rounded-2xl shadow-2xl overflow-hidden group">
+                
+                <!-- Mockup Header Bar -->
+                <div class="flex items-center justify-between px-4 py-3 bg-[#131313] rounded-xl border border-white/5 mb-4">
+                    <div class="flex items-center gap-2">
+                        <div class="w-3 h-3 rounded-full bg-rose-500/80"></div>
+                        <div class="w-3 h-3 rounded-full bg-amber-500/80"></div>
+                        <div class="w-3 h-3 rounded-full bg-emerald-500/80"></div>
+                        <span class="ml-3 text-xs font-mono-technical text-gray-400 truncate max-w-[200px]">RevisionRoom // Project: Commercial_Cut_v2.mp4</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="text-[10px] font-mono-technical bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-2 py-0.5 rounded uppercase font-bold">● Live Sync</span>
+                        <span class="text-xs font-mono-technical text-gray-400 hidden sm:block">Share Token: <code class="text-accent font-mono">x9f8k2...</code></span>
+                    </div>
+                </div>
+
+                <!-- Mockup Body (Dual Video Player Simulation) -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                    
+                    <!-- Left 2 Cols: Player Mock -->
+                    <div class="lg:col-span-2 space-y-3">
+                        <div class="bg-black aspect-video rounded-xl border border-white/10 relative overflow-hidden flex items-center justify-center group/video">
+                            <!-- Background Dark Gradients to simulate video frame -->
+                            <div class="absolute inset-0 bg-gradient-to-tr from-slate-950 via-slate-900 to-indigo-950/40"></div>
+                            
+                            <!-- Central Play Icon Simulation -->
+                            <div class="w-16 h-16 rounded-full bg-accent/90 flex items-center justify-center shadow-2xl text-[#131313] group-hover/video:scale-110 transition-transform cursor-pointer">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 ml-1" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M8 5v14l11-7z" />
+                                </svg>
                             </div>
 
-                            <div
-                                class="relative flex items-center gap-6 lg:items-end"
-                            >
-                                <div
-                                    id="docs-card-content"
-                                    class="flex items-start gap-6 lg:flex-col"
-                                >
-                                    <div
-                                        class="flex size-12 shrink-0 items-center justify-center rounded-full bg-[#FF2D20]/10 sm:size-16"
-                                    >
-                                        <svg
-                                            class="size-5 sm:size-6"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                fill="#FF2D20"
-                                                d="M23 4a1 1 0 0 0-1.447-.894L12.224 7.77a.5.5 0 0 1-.448 0L2.447 3.106A1 1 0 0 0 1 4v13.382a1.99 1.99 0 0 0 1.105 1.79l9.448 4.728c.14.065.293.1.447.1.154-.005.306-.04.447-.105l9.453-4.724a1.99 1.99 0 0 0 1.1-1.789V4ZM3 6.023a.25.25 0 0 1 .362-.223l7.5 3.75a.251.251 0 0 1 .138.223v11.2a.25.25 0 0 1-.362.224l-7.5-3.75a.25.25 0 0 1-.138-.22V6.023Zm18 11.2a.25.25 0 0 1-.138.224l-7.5 3.75a.249.249 0 0 1-.329-.099.249.249 0 0 1-.033-.12V9.772a.251.251 0 0 1 .138-.224l7.5-3.75a.25.25 0 0 1 .362.224v11.2Z"
-                                            />
-                                            <path
-                                                fill="#FF2D20"
-                                                d="m3.55 1.893 8 4.048a1.008 1.008 0 0 0 .9 0l8-4.048a1 1 0 0 0-.9-1.785l-7.322 3.706a.506.506 0 0 1-.452 0L4.454.108a1 1 0 0 0-.9 1.785H3.55Z"
-                                            />
-                                        </svg>
-                                    </div>
+                            <!-- Floating Comment Pins on Timeline Simulation -->
+                            <div class="absolute bottom-12 left-1/4 px-2.5 py-1 bg-accent text-[#131313] text-[10px] font-bold font-mono-technical rounded shadow-lg animate-bounce">
+                                00:14 — Color Grade Adjustment
+                            </div>
 
-                                    <div class="pt-3 sm:pt-5 lg:pt-0">
-                                        <h2
-                                            class="text-xl font-semibold text-black dark:text-white"
-                                        >
-                                            Documentation
-                                        </h2>
-
-                                        <p class="mt-4 text-sm/relaxed">
-                                            Laravel has wonderful documentation
-                                            covering every aspect of the
-                                            framework. Whether you are a
-                                            newcomer or have prior experience
-                                            with Laravel, we recommend reading
-                                            our documentation from beginning to
-                                            end.
-                                        </p>
-                                    </div>
+                            <!-- Video Overlay Control Bar Mockup -->
+                            <div class="absolute bottom-0 inset-x-0 bg-slate-950/80 backdrop-blur-md p-3 border-t border-white/10 flex items-center gap-3">
+                                <span class="text-[11px] font-mono-technical text-accent">00:14 / 01:30</span>
+                                <div class="flex-1 h-1.5 bg-white/10 rounded-full relative">
+                                    <div class="w-1/4 h-full bg-accent rounded-full"></div>
+                                    <div class="absolute left-1/4 top-1/2 -translate-y-1/2 w-3 h-3 bg-accent rounded-full border-2 border-[#131313]"></div>
                                 </div>
-
-                                <svg
-                                    class="size-6 shrink-0 stroke-[#FF2D20]"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke-width="1.5"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75"
-                                    />
-                                </svg>
-                            </div>
-                        </a>
-
-                        <a
-                            href="https://laracasts.com"
-                            class="flex items-start gap-4 rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] transition duration-300 hover:text-black/70 hover:ring-black/20 focus:outline-none focus-visible:ring-[#FF2D20] lg:pb-10 dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:text-white/70 dark:hover:ring-zinc-700 dark:focus-visible:ring-[#FF2D20]"
-                        >
-                            <div
-                                class="flex size-12 shrink-0 items-center justify-center rounded-full bg-[#FF2D20]/10 sm:size-16"
-                            >
-                                <svg
-                                    class="size-5 sm:size-6"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <g fill="#FF2D20">
-                                        <path
-                                            d="M24 8.25a.5.5 0 0 0-.5-.5H.5a.5.5 0 0 0-.5.5v12a2.5 2.5 0 0 0 2.5 2.5h19a2.5 2.5 0 0 0 2.5-2.5v-12Zm-7.765 5.868a1.221 1.221 0 0 1 0 2.264l-6.626 2.776A1.153 1.153 0 0 1 8 18.123v-5.746a1.151 1.151 0 0 1 1.609-1.035l6.626 2.776ZM19.564 1.677a.25.25 0 0 0-.177-.427H15.6a.106.106 0 0 0-.072.03l-4.54 4.543a.25.25 0 0 0 .177.427h3.783c.027 0 .054-.01.073-.03l4.543-4.543ZM22.071 1.318a.047.047 0 0 0-.045.013l-4.492 4.492a.249.249 0 0 0 .038.385.25.25 0 0 0 .14.042h5.784a.5.5 0 0 0 .5-.5v-2a2.5 2.5 0 0 0-1.925-2.432ZM13.014 1.677a.25.25 0 0 0-.178-.427H9.101a.106.106 0 0 0-.073.03l-4.54 4.543a.25.25 0 0 0 .177.427H8.4a.106.106 0 0 0 .073-.03l4.54-4.543ZM6.513 1.677a.25.25 0 0 0-.177-.427H2.5A2.5 2.5 0 0 0 0 3.75v2a.5.5 0 0 0 .5.5h1.4a.106.106 0 0 0 .073-.03l4.54-4.543Z"
-                                        />
-                                    </g>
-                                </svg>
-                            </div>
-
-                            <div class="pt-3 sm:pt-5">
-                                <h2
-                                    class="text-xl font-semibold text-black dark:text-white"
-                                >
-                                    Laracasts
-                                </h2>
-
-                                <p class="mt-4 text-sm/relaxed">
-                                    Laracasts offers thousands of video
-                                    tutorials on Laravel, PHP, and JavaScript
-                                    development. Check them out, see for
-                                    yourself, and massively level up your
-                                    development skills in the process.
-                                </p>
-                            </div>
-
-                            <svg
-                                class="size-6 shrink-0 self-center stroke-[#FF2D20]"
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke-width="1.5"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75"
-                                />
-                            </svg>
-                        </a>
-
-                        <a
-                            href="https://laravel-news.com"
-                            class="flex items-start gap-4 rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] transition duration-300 hover:text-black/70 hover:ring-black/20 focus:outline-none focus-visible:ring-[#FF2D20] lg:pb-10 dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:text-white/70 dark:hover:ring-zinc-700 dark:focus-visible:ring-[#FF2D20]"
-                        >
-                            <div
-                                class="flex size-12 shrink-0 items-center justify-center rounded-full bg-[#FF2D20]/10 sm:size-16"
-                            >
-                                <svg
-                                    class="size-5 sm:size-6"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <g fill="#FF2D20">
-                                        <path
-                                            d="M8.75 4.5H5.5c-.69 0-1.25.56-1.25 1.25v4.75c0 .69.56 1.25 1.25 1.25h3.25c.69 0 1.25-.56 1.25-1.25V5.75c0-.69-.56-1.25-1.25-1.25Z"
-                                        />
-                                        <path
-                                            d="M24 10a3 3 0 0 0-3-3h-2V2.5a2 2 0 0 0-2-2H2a2 2 0 0 0-2 2V20a3.5 3.5 0 0 0 3.5 3.5h17A3.5 3.5 0 0 0 24 20V10ZM3.5 21.5A1.5 1.5 0 0 1 2 20V3a.5.5 0 0 1 .5-.5h14a.5.5 0 0 1 .5.5v17c0 .295.037.588.11.874a.5.5 0 0 1-.484.625L3.5 21.5ZM22 20a1.5 1.5 0 1 1-3 0V9.5a.5.5 0 0 1 .5-.5H21a1 1 0 0 1 1 1v10Z"
-                                        />
-                                        <path
-                                            d="M12.751 6.047h2a.75.75 0 0 1 .75.75v.5a.75.75 0 0 1-.75.75h-2A.75.75 0 0 1 12 7.3v-.5a.75.75 0 0 1 .751-.753ZM12.751 10.047h2a.75.75 0 0 1 .75.75v.5a.75.75 0 0 1-.75.75h-2A.75.75 0 0 1 12 11.3v-.5a.75.75 0 0 1 .751-.753ZM4.751 14.047h10a.75.75 0 0 1 .75.75v.5a.75.75 0 0 1-.75.75h-10A.75.75 0 0 1 4 15.3v-.5a.75.75 0 0 1 .751-.753ZM4.75 18.047h7.5a.75.75 0 0 1 .75.75v.5a.75.75 0 0 1-.75.75h-7.5A.75.75 0 0 1 4 19.3v-.5a.75.75 0 0 1 .75-.753Z"
-                                        />
-                                    </g>
-                                </svg>
-                            </div>
-
-                            <div class="pt-3 sm:pt-5">
-                                <h2
-                                    class="text-xl font-semibold text-black dark:text-white"
-                                >
-                                    Laravel News
-                                </h2>
-
-                                <p class="mt-4 text-sm/relaxed">
-                                    Laravel News is a community driven portal
-                                    and newsletter aggregating all of the latest
-                                    and most important news in the Laravel
-                                    ecosystem, including new package releases
-                                    and tutorials.
-                                </p>
-                            </div>
-
-                            <svg
-                                class="size-6 shrink-0 self-center stroke-[#FF2D20]"
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke-width="1.5"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="M4.5 12h15m0 0l-6.75-6.75M19.5 12l-6.75 6.75"
-                                />
-                            </svg>
-                        </a>
-
-                        <div
-                            class="flex items-start gap-4 rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] lg:pb-10 dark:bg-zinc-900 dark:ring-zinc-800"
-                        >
-                            <div
-                                class="flex size-12 shrink-0 items-center justify-center rounded-full bg-[#FF2D20]/10 sm:size-16"
-                            >
-                                <svg
-                                    class="size-5 sm:size-6"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <g fill="#FF2D20">
-                                        <path
-                                            d="M16.597 12.635a.247.247 0 0 0-.08-.237 2.234 2.234 0 0 1-.769-1.68c.001-.195.03-.39.084-.578a.25.25 0 0 0-.09-.267 8.8 8.8 0 0 0-4.826-1.66.25.25 0 0 0-.268.181 2.5 2.5 0 0 1-2.4 1.824.045.045 0 0 0-.045.037 12.255 12.255 0 0 0-.093 3.86.251.251 0 0 0 .208.214c2.22.366 4.367 1.08 6.362 2.118a.252.252 0 0 0 .32-.079 10.09 10.09 0 0 0 1.597-3.733ZM13.616 17.968a.25.25 0 0 0-.063-.407A19.697 19.697 0 0 0 8.91 15.98a.25.25 0 0 0-.287.325c.151.455.334.898.548 1.328.437.827.981 1.594 1.619 2.28a.249.249 0 0 0 .32.044 29.13 29.13 0 0 0 2.506-1.99ZM6.303 14.105a.25.25 0 0 0 .265-.274 13.048 13.048 0 0 1 .205-4.045.062.062 0 0 0-.022-.07 2.5 2.5 0 0 1-.777-.982.25.25 0 0 0-.271-.149 11 11 0 0 0-5.6 2.815.255.255 0 0 0-.075.163c-.008.135-.02.27-.02.406.002.8.084 1.598.246 2.381a.25.25 0 0 0 .303.193 19.924 19.924 0 0 1 5.746-.438ZM9.228 20.914a.25.25 0 0 0 .1-.393 11.53 11.53 0 0 1-1.5-2.22 12.238 12.238 0 0 1-.91-2.465.248.248 0 0 0-.22-.187 18.876 18.876 0 0 0-5.69.33.249.249 0 0 0-.179.336c.838 2.142 2.272 4 4.132 5.353a.254.254 0 0 0 .15.048c1.41-.01 2.807-.282 4.117-.802ZM18.93 12.957l-.005-.008a.25.25 0 0 0-.268-.082 2.21 2.21 0 0 1-.41.081.25.25 0 0 0-.217.2c-.582 2.66-2.127 5.35-5.75 7.843a.248.248 0 0 0-.09.299.25.25 0 0 0 .065.091 28.703 28.703 0 0 0 2.662 2.12.246.246 0 0 0 .209.037c2.579-.701 4.85-2.242 6.456-4.378a.25.25 0 0 0 .048-.189 13.51 13.51 0 0 0-2.7-6.014ZM5.702 7.058a.254.254 0 0 0 .2-.165A2.488 2.488 0 0 1 7.98 5.245a.093.093 0 0 0 .078-.062 19.734 19.734 0 0 1 3.055-4.74.25.25 0 0 0-.21-.41 12.009 12.009 0 0 0-10.4 8.558.25.25 0 0 0 .373.281 12.912 12.912 0 0 1 4.826-1.814ZM10.773 22.052a.25.25 0 0 0-.28-.046c-.758.356-1.55.635-2.365.833a.25.25 0 0 0-.022.48c1.252.43 2.568.65 3.893.65.1 0 .2 0 .3-.008a.25.25 0 0 0 .147-.444c-.526-.424-1.1-.917-1.673-1.465ZM18.744 8.436a.249.249 0 0 0 .15.228 2.246 2.246 0 0 1 1.352 2.054c0 .337-.08.67-.23.972a.25.25 0 0 0 .042.28l.007.009a15.016 15.016 0 0 1 2.52 4.6.25.25 0 0 0 .37.132.25.25 0 0 0 .096-.114c.623-1.464.944-3.039.945-4.63a12.005 12.005 0 0 0-5.78-10.258.25.25 0 0 0-.373.274c.547 2.109.85 4.274.901 6.453ZM9.61 5.38a.25.25 0 0 0 .08.31c.34.24.616.561.8.935a.25.25 0 0 0 .3.127.631.631 0 0 1 .206-.034c2.054.078 4.036.772 5.69 1.991a.251.251 0 0 0 .267.024c.046-.024.093-.047.141-.067a.25.25 0 0 0 .151-.23A29.98 29.98 0 0 0 15.957.764a.25.25 0 0 0-.16-.164 11.924 11.924 0 0 0-2.21-.518.252.252 0 0 0-.215.076A22.456 22.456 0 0 0 9.61 5.38Z"
-                                        />
-                                    </g>
-                                </svg>
-                            </div>
-
-                            <div class="pt-3 sm:pt-5">
-                                <h2
-                                    class="text-xl font-semibold text-black dark:text-white"
-                                >
-                                    Vibrant Ecosystem
-                                </h2>
-
-                                <p class="mt-4 text-sm/relaxed">
-                                    Laravel's robust library of first-party
-                                    tools and libraries, such as
-                                    <a
-                                        href="https://forge.laravel.com"
-                                        class="rounded-sm underline hover:text-black focus:outline-none focus-visible:ring-1 focus-visible:ring-[#FF2D20] dark:hover:text-white dark:focus-visible:ring-[#FF2D20]"
-                                        >Forge</a
-                                    >,
-                                    <a
-                                        href="https://vapor.laravel.com"
-                                        class="rounded-sm underline hover:text-black focus:outline-none focus-visible:ring-1 focus-visible:ring-[#FF2D20] dark:hover:text-white"
-                                        >Vapor</a
-                                    >,
-                                    <a
-                                        href="https://nova.laravel.com"
-                                        class="rounded-sm underline hover:text-black focus:outline-none focus-visible:ring-1 focus-visible:ring-[#FF2D20] dark:hover:text-white"
-                                        >Nova</a
-                                    >,
-                                    <a
-                                        href="https://envoyer.io"
-                                        class="rounded-sm underline hover:text-black focus:outline-none focus-visible:ring-1 focus-visible:ring-[#FF2D20] dark:hover:text-white"
-                                        >Envoyer</a
-                                    >, and
-                                    <a
-                                        href="https://herd.laravel.com"
-                                        class="rounded-sm underline hover:text-black focus:outline-none focus-visible:ring-1 focus-visible:ring-[#FF2D20] dark:hover:text-white"
-                                        >Herd</a
-                                    >
-                                    help you take your projects to the next
-                                    level. Pair them with powerful open source
-                                    libraries like
-                                    <a
-                                        href="https://laravel.com/docs/billing"
-                                        class="rounded-sm underline hover:text-black focus:outline-none focus-visible:ring-1 focus-visible:ring-[#FF2D20] dark:hover:text-white"
-                                        >Cashier</a
-                                    >,
-                                    <a
-                                        href="https://laravel.com/docs/dusk"
-                                        class="rounded-sm underline hover:text-black focus:outline-none focus-visible:ring-1 focus-visible:ring-[#FF2D20] dark:hover:text-white"
-                                        >Dusk</a
-                                    >,
-                                    <a
-                                        href="https://laravel.com/docs/broadcasting"
-                                        class="rounded-sm underline hover:text-black focus:outline-none focus-visible:ring-1 focus-visible:ring-[#FF2D20] dark:hover:text-white"
-                                        >Echo</a
-                                    >,
-                                    <a
-                                        href="https://laravel.com/docs/horizon"
-                                        class="rounded-sm underline hover:text-black focus:outline-none focus-visible:ring-1 focus-visible:ring-[#FF2D20] dark:hover:text-white"
-                                        >Horizon</a
-                                    >,
-                                    <a
-                                        href="https://laravel.com/docs/sanctum"
-                                        class="rounded-sm underline hover:text-black focus:outline-none focus-visible:ring-1 focus-visible:ring-[#FF2D20] dark:hover:text-white"
-                                        >Sanctum</a
-                                    >,
-                                    <a
-                                        href="https://laravel.com/docs/telescope"
-                                        class="rounded-sm underline hover:text-black focus:outline-none focus-visible:ring-1 focus-visible:ring-[#FF2D20] dark:hover:text-white"
-                                        >Telescope</a
-                                    >, and more.
-                                </p>
+                                <span class="text-[10px] font-mono-technical bg-white/10 px-2 py-0.5 rounded text-gray-300">1080p60</span>
                             </div>
                         </div>
                     </div>
-                </main>
 
-                <footer
-                    class="py-16 text-center text-sm text-black dark:text-white/70"
-                >
-                    Laravel v{{ laravelVersion }} (PHP v{{ phpVersion }})
-                </footer>
+                    <!-- Right Col: Revision Checklist Mockup -->
+                    <div class="bg-[#131313] rounded-xl border border-white/10 p-4 space-y-3 flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-center border-b border-white/5 pb-2 mb-3">
+                                <span class="text-xs font-mono-technical uppercase tracking-wider text-gray-400 font-bold">Revision Checklist</span>
+                                <span class="text-[10px] font-mono-technical text-accent">3 Comments</span>
+                            </div>
+
+                            <div class="space-y-2">
+                                <div class="p-2.5 rounded bg-white/5 border border-white/5 text-xs space-y-1">
+                                    <div class="flex justify-between items-center">
+                                        <span class="font-mono-technical bg-white/10 text-accent text-[10px] px-1.5 py-0.5 rounded">00:14</span>
+                                        <span class="text-[10px] text-sky-400 font-mono-technical">● Requested</span>
+                                    </div>
+                                    <p class="text-gray-200 text-[11px]">Make the neon highlights pop more in the opening scene.</p>
+                                </div>
+
+                                <div class="p-2.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-xs space-y-1">
+                                    <div class="flex justify-between items-center">
+                                        <span class="font-mono-technical bg-white/10 text-emerald-400 text-[10px] px-1.5 py-0.5 rounded">00:42</span>
+                                        <span class="text-[10px] text-emerald-400 font-mono-technical">✓ Resolved</span>
+                                    </div>
+                                    <p class="text-gray-300 text-[11px]">Trim 2 frames off the transition to lower audio dip.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pt-3 border-t border-white/5 flex justify-between items-center">
+                            <span class="text-[10px] text-gray-400 font-mono-technical">Status: Reviewing</span>
+                            <button class="btn-primary py-1 px-3 text-[11px] font-mono-technical">
+                                Submit Revisions
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
             </div>
-        </div>
+        </section>
+
+        <!-- Feature Grid Section -->
+        <section id="features" class="py-20 px-6 max-w-7xl mx-auto relative z-10 space-y-12">
+            <div class="text-center space-y-4">
+                <span class="text-xs font-mono-technical uppercase tracking-widest text-accent font-bold">Built for Video Creators</span>
+                <h2 class="text-3xl sm:text-5xl font-editorial font-bold text-gray-100">Everything You Need for Seamless Reviews</h2>
+                <p class="text-gray-400 text-sm sm:text-base max-w-xl mx-auto">Eliminate friction, speed up turnarounds, and keep clients thrilled with your post-production workflow.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                
+                <!-- Feature 1 -->
+                <div class="glass-card p-6 bg-[#1a1a1a]/50 border border-white/5 hover:border-accent/30 transition-all duration-300 space-y-4">
+                    <div class="w-12 h-12 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center text-accent">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-editorial font-bold text-gray-200">Synchronized Dual Player</h3>
+                    <p class="text-xs text-gray-400 leading-relaxed font-sans">Compare v1 and v2 side-by-side with automatic drift correction, pre-buffering barriers, and unified master scrubbers.</p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="glass-card p-6 bg-[#1a1a1a]/50 border border-white/5 hover:border-emerald-500/30 transition-all duration-300 space-y-4">
+                    <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-editorial font-bold text-gray-200">Paste Screenshot Feedback</h3>
+                    <p class="text-xs text-gray-400 leading-relaxed font-sans">Clients can paste clipboard screenshots directly into comments with <kbd class="px-1 py-0.5 bg-white/10 rounded text-[10px] font-mono">Ctrl+V</kbd> alongside frame-exact timestamps.</p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="glass-card p-6 bg-[#1a1a1a]/50 border border-white/5 hover:border-indigo-500/30 transition-all duration-300 space-y-4">
+                    <div class="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-editorial font-bold text-gray-200">Passwordless Magic Links</h3>
+                    <p class="text-xs text-gray-400 leading-relaxed font-sans">Zero login barrier for clients. Send one secure share link and let them review immediately on any desktop or mobile device.</p>
+                </div>
+
+                <!-- Feature 4 -->
+                <div class="glass-card p-6 bg-[#1a1a1a]/50 border border-white/5 hover:border-sky-500/30 transition-all duration-300 space-y-4">
+                    <div class="w-12 h-12 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-editorial font-bold text-gray-200">Verifiable PDF Audit Trail</h3>
+                    <p class="text-xs text-gray-400 leading-relaxed font-sans">Once approved, generate a legally traceable PDF audit record complete with approver name, timestamp, and signature log.</p>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Step-by-Step Workflow Section -->
+        <section id="workflow" class="py-16 px-6 max-w-7xl mx-auto border-t border-white/5 relative z-10 space-y-12">
+            <div class="text-center space-y-3">
+                <span class="text-xs font-mono-technical uppercase tracking-widest text-accent font-bold">Simple 4-Step Process</span>
+                <h2 class="text-3xl sm:text-4xl font-editorial font-bold text-gray-100">How RevisionRoom Works</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 relative">
+                <!-- Step 1 -->
+                <div class="space-y-3 bg-[#1a1a1a]/30 p-5 rounded-xl border border-white/5">
+                    <span class="text-2xl font-mono-technical font-bold text-accent">01.</span>
+                    <h4 class="font-editorial font-bold text-gray-200">Upload Video Draft</h4>
+                    <p class="text-xs text-gray-400">Chunked background upload with automatic FFmpeg transcoding into streamable MP4 format.</p>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="space-y-3 bg-[#1a1a1a]/30 p-5 rounded-xl border border-white/5">
+                    <span class="text-2xl font-mono-technical font-bold text-emerald-400">02.</span>
+                    <h4 class="font-editorial font-bold text-gray-200">Share Client Link</h4>
+                    <p class="text-xs text-gray-400">Copy the secure magic URL and send it to your client. No sign-up or passwords required.</p>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="space-y-3 bg-[#1a1a1a]/30 p-5 rounded-xl border border-white/5">
+                    <span class="text-2xl font-mono-technical font-bold text-indigo-400">03.</span>
+                    <h4 class="font-editorial font-bold text-gray-200">Receive Live Feedback</h4>
+                    <p class="text-xs text-gray-400">Client comments lock to current video frame. Real-time 4s polling syncs editor and client views.</p>
+                </div>
+
+                <!-- Step 4 -->
+                <div class="space-y-3 bg-[#1a1a1a]/30 p-5 rounded-xl border border-white/5">
+                    <span class="text-2xl font-mono-technical font-bold text-sky-400">04.</span>
+                    <h4 class="font-editorial font-bold text-gray-200">Client Sign-off & PDF</h4>
+                    <p class="text-xs text-gray-400">Client signs off on the project. Project locks and generates an instant PDF verification record.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Call to Action Banner -->
+        <section class="py-16 px-6 max-w-7xl mx-auto relative z-10">
+            <div class="glass-card p-8 sm:p-12 bg-gradient-to-r from-[#1c1b1b] via-[#222121] to-[#1c1b1b] border border-white/10 rounded-2xl text-center space-y-6 relative overflow-hidden shadow-2xl">
+                <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-accent/10 rounded-full blur-3xl pointer-events-none"></div>
+                
+                <h2 class="text-3xl sm:text-4xl font-editorial font-bold text-gray-100">Ready to Upgrade Your Video Feedback?</h2>
+                <p class="text-sm text-gray-400 max-w-xl mx-auto font-sans">Start reviewing drafts with your clients right now. No credit card required.</p>
+                
+                <div class="pt-2 flex justify-center items-center gap-4 flex-wrap">
+                    <Link v-if="!auth_user" :href="route('register')" class="btn-primary py-3 px-8 text-sm text-[#131313] font-bold shadow-lg">
+                        Get Started Free →
+                    </Link>
+                    <Link v-else :href="route('dashboard')" class="btn-primary py-3 px-8 text-sm text-[#131313] font-bold shadow-lg">
+                        Go to Dashboard →
+                    </Link>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="border-t border-white/5 py-8 px-6 text-center text-xs text-gray-500 font-mono-technical space-y-2">
+            <p>RevisionRoom © 2026. Next-Gen Video Collaboration Platform.</p>
+            <div class="flex justify-center gap-4 text-gray-400">
+                <a href="#features" class="hover:text-accent">Features</a>
+                <span>•</span>
+                <a href="#workflow" class="hover:text-accent">Workflow</a>
+                <span>•</span>
+                <Link :href="route('login')" class="hover:text-accent">Sign In</Link>
+            </div>
+        </footer>
+
     </div>
 </template>

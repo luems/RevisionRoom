@@ -11,8 +11,12 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
-    return redirect()->route('login');
-});
+    return Inertia::render('Welcome', [
+        'canLogin' => Route::has('login'),
+        'canRegister' => Route::has('register'),
+        'auth_user' => Auth::user(),
+    ]);
+})->name('welcome');
 
 // Map standard Dashboard to ProjectController index
 Route::get('/dashboard', [ProjectController::class, 'index'])
