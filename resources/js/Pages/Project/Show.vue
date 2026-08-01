@@ -393,14 +393,14 @@ onMounted(() => {
                                     <h4 class="text-base font-editorial font-bold text-gray-200">Draft Version {{ activeDraft.version_number }}</h4>
                                 </div>
                                 <div class="flex items-center gap-2">
-                                    <span class="text-xs text-gray-400 font-mono-technical uppercase tracking-wider">Versions:</span>
-                                    <div class="flex gap-1 bg-slate-950 p-1 rounded-sm border border-white/5">
+                                    <span class="text-xs text-gray-200 font-mono-technical uppercase tracking-wider font-semibold">Versions:</span>
+                                    <div class="flex gap-1 bg-slate-950 p-1 rounded-sm border border-white/10">
                                         <button 
                                             v-for="(draft, idx) in project.drafts" 
                                             :key="draft.id" 
                                             @click="currentDraftIndex = idx" 
-                                            :class="`px-2.5 py-1 text-[10px] uppercase tracking-wider font-bold rounded-sm transition-all ${
-                                                currentDraftIndex === idx ? 'bg-accent text-[#131313]' : 'text-gray-400 hover:text-white hover:bg-white/5'
+                                            :class="`px-2.5 py-1 text-[11px] uppercase tracking-wider font-bold rounded-sm transition-all ${
+                                                currentDraftIndex === idx ? 'bg-accent text-[#131313] font-extrabold shadow' : 'bg-white/10 text-gray-100 hover:text-white hover:bg-white/20 border border-white/10'
                                             }`"
                                         >
                                             v{{ draft.version_number }}
