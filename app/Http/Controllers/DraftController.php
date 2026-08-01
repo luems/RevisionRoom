@@ -8,6 +8,7 @@ use App\Jobs\ProcessVideoDraft;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class DraftController extends Controller
 {
@@ -110,16 +111,18 @@ class DraftController extends Controller
 
         $request->validate([
             'file' => 'required|file',
-            'chunk_index' => 'required|integer',
-            'total_chunks' => 'required|integer',
+            'chunk_index' => 'required|integer|min:0',
+            'total_chunks' => 'required|integer|min:1',
             'filename' => 'required|string',
-            'upload_id' => 'required|string',
+            'upload_id' => ['required', 'string', 'regex:/^[A-Za-z0-9_-]+$/'],
         ]);
 
         $chunkIndex = $request->input('chunk_index');
         $totalChunks = $request->input('total_chunks');
         $filename = $request->input('filename');
         $uploadId = $request->input('upload_id');
+
+        abort_if($chunkIndex >= $totalChunks, 422, 'Invalid chunk index.');
 
         $chunkFile = $request->file('file');
         
@@ -129,20 +132,41 @@ class DraftController extends Controller
             mkdir($tempDir, 0777, true);
         }
 
-        // Move the chunk file
-        $chunkFile->move($tempDir, "chunk_{$chunkIndex}");
+        // The browser sends chunks sequentially. Append each chunk immediately so
+        // the final request does not have to copy the entire video again at 99%.
+        $assemblyPath = "{$tempDir}/video.part";
+        $nextChunkPath = "{$tempDir}/next_chunk";
+        $nextChunk = file_exists($nextChunkPath) ? (int) file_get_contents($nextChunkPath) : 0;
 
-        // Check if all chunks have been uploaded
-        $uploadedChunks = count(glob("{$tempDir}/chunk_*"));
+        if ($chunkIndex !== $nextChunk) {
+            return response()->json([
+                'message' => "Unexpected chunk {$chunkIndex}; expected {$nextChunk}.",
+            ], 409);
+        }
 
-        if ($uploadedChunks === $totalChunks) {
-            // Merge all chunks
+        $input = fopen($chunkFile->getRealPath(), 'rb');
+        $output = fopen($assemblyPath, $chunkIndex === 0 ? 'wb' : 'ab');
+
+        if ($input === false || $output === false) {
+            throw new \RuntimeException('Unable to open the upload assembly file.');
+        }
+
+        try {
+            stream_copy_to_stream($input, $output);
+        } finally {
+            fclose($input);
+            fclose($output);
+        }
+
+        file_put_contents($nextChunkPath, (string) ($chunkIndex + 1), LOCK_EX);
+
+        if ($chunkIndex === $totalChunks - 1) {
             $extension = pathinfo($filename, PATHINFO_EXTENSION);
-            $newFilename = md5($filename . time()) . '.' . $extension;
+            $newFilename = (string) Str::uuid() . ($extension ? ".{$extension}" : '');
             $diskName = config('filesystems.default') === 's3' ? 's3' : 'public';
             $finalPath = "drafts/{$newFilename}";
 
-            if ($diskName === 'public' || $diskName === 'local') {
+            if ($diskName === 'public') {
                 $finalPhysicalPath = Storage::disk($diskName)->path($finalPath);
                 
                 // Ensure directory exists
@@ -151,39 +175,20 @@ class DraftController extends Controller
                     mkdir($finalDir, 0777, true);
                 }
 
-                if (file_exists($finalPhysicalPath)) {
-                    @unlink($finalPhysicalPath);
+                // Same filesystem: rename is atomic and effectively instant,
+                // regardless of the completed video's size.
+                if (!rename($assemblyPath, $finalPhysicalPath)) {
+                    throw new \RuntimeException('Unable to finalize the uploaded video.');
                 }
-
-                for ($i = 0; $i < $totalChunks; $i++) {
-                    $chunkPath = "{$tempDir}/chunk_{$i}";
-                    if (file_exists($chunkPath)) {
-                        file_put_contents($finalPhysicalPath, file_get_contents($chunkPath), FILE_APPEND);
-                        @unlink($chunkPath); // Delete chunk after merging
-                    }
-                }
-                @rmdir($tempDir);
             } else {
-                // If using S3 or another cloud disk, merge to temp file then put to S3
-                $tempMergedFile = storage_path("app/chunks/{$uploadId}_merged.tmp");
-                if (file_exists($tempMergedFile)) {
-                    @unlink($tempMergedFile);
-                }
-
-                for ($i = 0; $i < $totalChunks; $i++) {
-                    $chunkPath = "{$tempDir}/chunk_{$i}";
-                    if (file_exists($chunkPath)) {
-                        file_put_contents($tempMergedFile, file_get_contents($chunkPath), FILE_APPEND);
-                        @unlink($chunkPath);
-                    }
-                }
-                @rmdir($tempDir);
-
-                $fileContent = fopen($tempMergedFile, 'r');
+                $fileContent = fopen($assemblyPath, 'rb');
                 Storage::disk($diskName)->put($finalPath, $fileContent);
                 fclose($fileContent);
-                @unlink($tempMergedFile);
+                unlink($assemblyPath);
             }
+
+            @unlink($nextChunkPath);
+            @rmdir($tempDir);
 
             // Get next version number
             $nextVersion = $project->drafts()->max('version_number') + 1;
@@ -200,13 +205,6 @@ class DraftController extends Controller
 
             // Dispatch background processing job
             ProcessVideoDraft::dispatch($draft);
-
-            // Pop a background queue worker to run immediately in the background without blocking the HTTP thread
-            if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
-                pclose(popen("start /B cmd /C php artisan queue:work --once > NUL 2>&1", "r"));
-            } else {
-                shell_exec("php artisan queue:work --once > /dev/null 2>&1 &");
-            }
 
             return response()->json([
                 'status' => 'completed',

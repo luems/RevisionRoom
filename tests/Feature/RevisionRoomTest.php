@@ -7,12 +7,55 @@ use App\Models\Project;
 use App\Models\Draft;
 use App\Models\Comment;
 use App\Models\Approval;
+use App\Jobs\ProcessVideoDraft;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class RevisionRoomTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_chunked_upload_is_assembled_incrementally_and_queued()
+    {
+        Storage::fake('public');
+        Queue::fake();
+
+        $editor = User::factory()->create(['role' => 'editor']);
+        $project = Project::create([
+            'name' => 'Large upload',
+            'editor_id' => $editor->id,
+            'share_token' => 'large-upload-token',
+        ]);
+
+        $payload = [
+            'total_chunks' => 2,
+            'filename' => 'review.mp4',
+            'upload_id' => 'upload_test_123',
+        ];
+
+        $first = $this->actingAs($editor)->post(route('drafts.upload-chunk', $project), [
+            ...$payload,
+            'chunk_index' => 0,
+            'file' => UploadedFile::fake()->createWithContent('chunk', 'first-'),
+        ]);
+
+        $first->assertOk()->assertJson(['status' => 'chunk_uploaded']);
+        $this->assertDatabaseCount('drafts', 0);
+
+        $second = $this->actingAs($editor)->post(route('drafts.upload-chunk', $project), [
+            ...$payload,
+            'chunk_index' => 1,
+            'file' => UploadedFile::fake()->createWithContent('chunk', 'second'),
+        ]);
+
+        $second->assertOk()->assertJson(['status' => 'completed']);
+        $draft = Draft::sole();
+        $this->assertSame('first-second', Storage::disk('public')->get($draft->video_path));
+        Queue::assertPushed(ProcessVideoDraft::class, fn ($job) => $job->draft->is($draft));
+    }
 
     public function test_editor_can_create_project_and_creates_client()
     {
