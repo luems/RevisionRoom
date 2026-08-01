@@ -299,12 +299,12 @@ const deleteProject = () => {
                                     <p class="text-xs text-gray-400 mt-1">Please try uploading a different format.</p>
                                 </div>
                             </div>
-                            <div v-else class="bg-slate-900 aspect-video flex flex-col items-center justify-center p-8 text-gray-500">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mb-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <div v-else class="bg-[#1c1b1b] aspect-video flex flex-col items-center justify-center p-8 text-gray-500 rounded-none">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mb-4 opacity-35 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                                 </svg>
-                                <h4 class="font-semibold text-lg">No drafts uploaded</h4>
-                                <p class="text-sm text-gray-400 mt-1 mb-4">Upload your first draft version to get started.</p>
+                                <h4 class="font-editorial text-lg font-bold text-gray-300">No drafts uploaded</h4>
+                                <p class="text-xs text-gray-400 font-mono-technical uppercase tracking-wider mt-2">Upload your first draft version to get started.</p>
                             </div>
 
                             <div v-if="activeDraft" class="p-6 bg-[#1a1a1a]/50 border-t border-white/5 flex justify-between items-center flex-wrap gap-4">
