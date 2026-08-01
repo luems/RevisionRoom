@@ -55,47 +55,31 @@ class ProcessVideoDraft implements ShouldQueue
                 throw new \Exception("Video file does not exist locally: " . $localVideoPath);
             }
 
-            // Initialize FFmpeg and FFProbe
-            $ffmpeg = FFMpeg::create([
-                'ffmpeg.binaries'  => 'ffmpeg',
-                'ffprobe.binaries' => 'ffprobe',
-            ]);
-            $ffprobe = FFProbe::create([
-                'ffmpeg.binaries'  => 'ffmpeg',
-                'ffprobe.binaries' => 'ffprobe',
-            ]);
-
-            // 1. Get Duration
+            // 1. Get Duration via direct ffprobe (much faster than PHP wrapper)
             $duration = 0.0;
             try {
-                $duration = (float) $ffprobe
-                    ->format($localVideoPath)
-                    ->get('duration');
-            } catch (\Exception $e) {
-                Log::warning("FFProbe failed to get duration, trying shell: " . $e->getMessage());
-                $cmd = "ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 " . escapeshellarg($localVideoPath);
-                $shellDuration = shell_exec($cmd);
+                $cmdProbe = "ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 " . escapeshellarg($localVideoPath);
+                $shellDuration = shell_exec($cmdProbe);
                 if ($shellDuration && is_numeric(trim($shellDuration))) {
                     $duration = (float) trim($shellDuration);
                 } else {
                     $duration = 10.0; // Default fallback
                 }
+            } catch (\Exception $e) {
+                Log::warning("FFProbe direct execution failed: " . $e->getMessage());
+                $duration = 10.0;
             }
 
-            // 2. Extract Thumbnail
+            // 2. Extract Thumbnail via high-performance fast-seek ffmpeg (-ss before -i is instant)
             $localThumbName = Str::random(40) . '.jpg';
             $localThumbPath = $tempDir . '/' . $localThumbName;
             $thumbSec = $duration > 2.0 ? 2.0 : $duration / 2.0;
 
             try {
-                $video = $ffmpeg->open($localVideoPath);
-                $video
-                    ->frame(\FFMpeg\Coordinate\TimeCode::fromSeconds($thumbSec))
-                    ->save($localThumbPath);
+                $cmdThumb = "ffmpeg -y -ss " . $thumbSec . " -i " . escapeshellarg($localVideoPath) . " -vframes 1 " . escapeshellarg($localThumbPath) . " 2>&1";
+                shell_exec($cmdThumb);
             } catch (\Exception $e) {
-                Log::warning("FFMpeg frame extraction failed, trying shell: " . $e->getMessage());
-                $cmd = "ffmpeg -y -i " . escapeshellarg($localVideoPath) . " -ss " . $thumbSec . " -vframes 1 " . escapeshellarg($localThumbPath);
-                shell_exec($cmd);
+                Log::warning("FFMpeg direct command failed: " . $e->getMessage());
             }
 
             // 3. Move thumbnail to storage

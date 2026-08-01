@@ -151,32 +151,32 @@ class DraftController extends Controller
                     mkdir($finalDir, 0777, true);
                 }
 
-                $out = fopen($finalPhysicalPath, "wb");
+                if (file_exists($finalPhysicalPath)) {
+                    @unlink($finalPhysicalPath);
+                }
+
                 for ($i = 0; $i < $totalChunks; $i++) {
                     $chunkPath = "{$tempDir}/chunk_{$i}";
-                    $in = fopen($chunkPath, "rb");
-                    while ($buff = fread($in, 262144)) {
-                        fwrite($out, $buff);
+                    if (file_exists($chunkPath)) {
+                        file_put_contents($finalPhysicalPath, file_get_contents($chunkPath), FILE_APPEND);
+                        @unlink($chunkPath); // Delete chunk after merging
                     }
-                    fclose($in);
-                    @unlink($chunkPath); // Delete chunk after merging
                 }
-                fclose($out);
                 @rmdir($tempDir);
             } else {
                 // If using S3 or another cloud disk, merge to temp file then put to S3
                 $tempMergedFile = storage_path("app/chunks/{$uploadId}_merged.tmp");
-                $out = fopen($tempMergedFile, "wb");
+                if (file_exists($tempMergedFile)) {
+                    @unlink($tempMergedFile);
+                }
+
                 for ($i = 0; $i < $totalChunks; $i++) {
                     $chunkPath = "{$tempDir}/chunk_{$i}";
-                    $in = fopen($chunkPath, "rb");
-                    while ($buff = fread($in, 262144)) {
-                        fwrite($out, $buff);
+                    if (file_exists($chunkPath)) {
+                        file_put_contents($tempMergedFile, file_get_contents($chunkPath), FILE_APPEND);
+                        @unlink($chunkPath);
                     }
-                    fclose($in);
-                    @unlink($chunkPath);
                 }
-                fclose($out);
                 @rmdir($tempDir);
 
                 $fileContent = fopen($tempMergedFile, 'r');
