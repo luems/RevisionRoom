@@ -199,11 +199,9 @@ const showGuide = ref(false);
                 </div>
 
                 <div class="flex items-center gap-3">
-                    <span :class="`px-2 py-0.5 rounded-sm text-[10px] font-semibold uppercase tracking-wider flex items-center gap-1.5 border ${
-                        project.status === 'approved' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : project.status === 'archived' ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
-                    }`">
+                    <span class="bg-[#1c1b1b] border border-white/5 px-2.5 py-1 rounded-sm text-[10px] font-mono-technical font-semibold uppercase tracking-wider flex items-center gap-1.5 text-gray-200">
                         <span :class="`w-1.5 h-1.5 rounded-full ${
-                            project.status === 'approved' ? 'bg-emerald-400' : project.status === 'archived' ? 'bg-indigo-400' : 'bg-amber-400'
+                            project.status === 'approved' ? 'bg-[#10b981]' : project.status === 'archived' ? 'bg-[#6366f1]' : 'bg-[#f59e0b]'
                         }`"></span>
                         {{ project.status }}
                     </span>
