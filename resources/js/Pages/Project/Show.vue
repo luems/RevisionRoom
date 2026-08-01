@@ -93,6 +93,13 @@ const fileSizeMB = computed(() => {
     return Math.round(uploadFile.value.size / (1024 * 1024));
 });
 
+const uploadedMB = computed(() => {
+    if (!uploadFile.value) return 0;
+    const totalSize = uploadFile.value.size;
+    const currentBytes = Math.round((chunkProgress.value / 100) * totalSize);
+    return Math.round(currentBytes / (1024 * 1024));
+});
+
 const handleFileSelect = (e) => {
     uploadFile.value = e.target.files[0];
     console.log('[ProjectView] Selected file for upload:', uploadFile.value ? { name: uploadFile.value.name, size: uploadFile.value.size } : null);
@@ -513,13 +520,16 @@ const deleteProject = () => {
                         {{ uploadError }}
                     </div>
 
-                    <div v-if="uploadStatus === 'uploading'" class="space-y-1.5">
-                        <div class="flex justify-between text-[10px] text-gray-400 font-mono-technical">
-                            <span>Uploading Chunk {{ chunkIndexInfo.current }} / {{ chunkIndexInfo.total }}</span>
+                    <div v-if="uploadStatus === 'uploading'" class="space-y-2">
+                        <div class="flex justify-between text-xs text-gray-400 font-mono-technical">
+                            <span>Uploading Draft ({{ uploadedMB }} MB / {{ fileSizeMB }} MB)</span>
                             <span class="font-bold text-accent">{{ chunkProgress }}%</span>
                         </div>
-                        <div class="w-full bg-slate-950 rounded-none h-1 border border-white/5 overflow-hidden">
-                            <div class="bg-accent h-1 transition-all duration-200" :style="`width: ${chunkProgress}%`"></div>
+                        <div class="w-full bg-slate-950 rounded-none h-2 border border-white/5 overflow-hidden">
+                            <div class="bg-accent h-2 transition-all duration-200" :style="`width: ${chunkProgress}%`"></div>
+                        </div>
+                        <div class="text-[9px] text-gray-500 font-mono-technical text-right">
+                            Chunk {{ chunkIndexInfo.current }} of {{ chunkIndexInfo.total }}
                         </div>
                     </div>
                     
