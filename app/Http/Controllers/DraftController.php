@@ -103,4 +103,96 @@ class DraftController extends Controller
             fclose($file);
         }, $status, $headers);
     }
+
+    public function uploadChunk(Request $request, $projectId)
+    {
+        $project = Project::where('editor_id', Auth::id())->findOrFail($projectId);
+
+        $request->validate([
+            'file' => 'required|file',
+            'chunk_index' => 'required|integer',
+            'total_chunks' => 'required|integer',
+            'filename' => 'required|string',
+            'upload_id' => 'required|string',
+        ]);
+
+        $chunkIndex = $request->input('chunk_index');
+        $totalChunks = $request->input('total_chunks');
+        $filename = $request->input('filename');
+        $uploadId = $request->input('upload_id');
+
+        $chunkFile = $request->file('file');
+        
+        // Define directory to store temporary chunks
+        $tempDir = storage_path("app/chunks/{$uploadId}");
+        if (!file_exists($tempDir)) {
+            mkdir($tempDir, 0777, true);
+        }
+
+        // Move the chunk file
+        $chunkFile->move($tempDir, "chunk_{$chunkIndex}");
+
+        // Check if all chunks have been uploaded
+        $uploadedChunks = count(glob("{$tempDir}/chunk_*"));
+
+        if ($uploadedChunks === $totalChunks) {
+            // Merge all chunks
+            $extension = pathinfo($filename, PATHINFO_EXTENSION);
+            $newFilename = md5($filename . time()) . '.' . $extension;
+            $diskName = config('filesystems.default') === 's3' ? 's3' : 'public';
+            
+            // Final destination path
+            $finalPath = "drafts/{$newFilename}";
+            $tempMergedFile = storage_path("app/chunks/{$uploadId}_merged.tmp");
+
+            $out = fopen($tempMergedFile, "wb");
+            for ($i = 0; $i < $totalChunks; $i++) {
+                $chunkPath = "{$tempDir}/chunk_{$i}";
+                $in = fopen($chunkPath, "rb");
+                while ($buff = fread($in, 4096)) {
+                    fwrite($out, $buff);
+                }
+                fclose($in);
+                @unlink($chunkPath); // Delete chunk after merging
+            }
+            fclose($out);
+            
+            // Delete temp chunks folder
+            @rmdir($tempDir);
+
+            // Put merged file into the final disk store
+            $fileContent = fopen($tempMergedFile, 'r');
+            Storage::disk($diskName)->put($finalPath, $fileContent);
+            fclose($fileContent);
+            @unlink($tempMergedFile); // Clean up temp merged file
+
+            // Get next version number
+            $nextVersion = $project->drafts()->max('version_number') + 1;
+
+            $draft = Draft::create([
+                'project_id' => $project->id,
+                'version_number' => $nextVersion,
+                'video_path' => $finalPath,
+                'thumbnail_path' => null,
+                'duration' => null,
+                'original_filename' => $filename,
+                'status' => 'processing',
+            ]);
+
+            // Dispatch background processing job
+            ProcessVideoDraft::dispatch($draft);
+
+            return response()->json([
+                'status' => 'completed',
+                'version' => $nextVersion,
+                'message' => 'Video draft uploaded and merged successfully.'
+            ]);
+        }
+
+        return response()->json([
+            'status' => 'chunk_uploaded',
+            'chunk_index' => $chunkIndex,
+            'message' => 'Chunk uploaded successfully.'
+        ]);
+    }
 }

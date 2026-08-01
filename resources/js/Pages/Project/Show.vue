@@ -2,6 +2,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link, useForm, router } from '@inertiajs/vue3';
 import { ref, computed, watch, onUnmounted } from 'vue';
+import axios from 'axios';
 
 const props = defineProps({
     project: Object,
@@ -81,38 +82,81 @@ const jumpToTime = (seconds) => {
     }
 };
 
-const uploadForm = useForm({
-    video: null,
-});
+const uploadFile = ref(null);
+const uploadStatus = ref('idle'); // idle, uploading, merging, error, success
+const chunkProgress = ref(0); // 0 to 100
+const chunkIndexInfo = ref({ current: 0, total: 0 });
+const uploadError = ref(null);
 
 const fileSizeMB = computed(() => {
-    if (!uploadForm.video) return 0;
-    return Math.round(uploadForm.video.size / (1024 * 1024));
+    if (!uploadFile.value) return 0;
+    return Math.round(uploadFile.value.size / (1024 * 1024));
 });
 
-const uploadProgress = ref(0);
-
-const uploadDraft = () => {
-    uploadForm.post(route('drafts.store', props.project.id), {
-        onStart: () => {
-            console.log('[ProjectView] Starting video draft upload...', uploadForm.video ? { name: uploadForm.video.name, size: uploadForm.video.size } : 'No file');
-        },
-        onSuccess: () => {
-            console.log('[ProjectView] Video draft uploaded successfully!');
-            showUploadModal.value = false;
-            uploadForm.reset();
-            uploadProgress.value = 0;
-        },
-        onError: (errors) => {
-            console.error('[ProjectView] Video draft upload failed. Validation errors:', errors);
-        },
-        forceFormData: true,
-    });
+const handleFileSelect = (e) => {
+    uploadFile.value = e.target.files[0];
+    console.log('[ProjectView] Selected file for upload:', uploadFile.value ? { name: uploadFile.value.name, size: uploadFile.value.size } : null);
 };
 
-const handleFileSelect = (e) => {
-    uploadForm.video = e.target.files[0];
-    console.log('[ProjectView] Selected file for upload:', uploadForm.video ? { name: uploadForm.video.name, size: uploadForm.video.size } : null);
+const uploadDraft = async () => {
+    if (!uploadFile.value || uploadStatus.value === 'uploading') return;
+
+    uploadStatus.value = 'uploading';
+    uploadError.value = null;
+
+    const file = uploadFile.value;
+    const chunkSize = 10 * 1024 * 1024; // 10MB chunk size
+    const totalChunks = Math.ceil(file.size / chunkSize);
+    const uploadId = 'upload_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    
+    chunkIndexInfo.value = { current: 0, total: totalChunks };
+    chunkProgress.value = 0;
+
+    for (let index = 0; index < totalChunks; index++) {
+        const start = index * chunkSize;
+        const end = Math.min(start + chunkSize, file.size);
+        const chunk = file.slice(start, end);
+
+        const formData = new FormData();
+        formData.append('file', chunk);
+        formData.append('chunk_index', index);
+        formData.append('total_chunks', totalChunks);
+        formData.append('filename', file.name);
+        formData.append('upload_id', uploadId);
+
+        try {
+            const response = await axios.post(route('drafts.upload-chunk', props.project.id), formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+                onUploadProgress: (progressEvent) => {
+                    const chunkUploadedPercent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                    const overallPercent = Math.round(((index * 100) + chunkUploadedPercent) / totalChunks);
+                    chunkProgress.value = Math.min(overallPercent, 99); // Let the completed status set 100
+                }
+            });
+
+            chunkIndexInfo.value.current = index + 1;
+
+            if (response.data.status === 'completed') {
+                chunkProgress.value = 100;
+                uploadStatus.value = 'success';
+                setTimeout(() => {
+                    showUploadModal.value = false;
+                    uploadFile.value = null;
+                    uploadStatus.value = 'idle';
+                    chunkProgress.value = 0;
+                    router.reload();
+                }, 1000);
+                return;
+            }
+        } catch (error) {
+            console.error('[ProjectView] Chunk upload error:', error);
+            uploadStatus.value = 'error';
+            uploadError.value = error.response?.data?.message || 'Upload failed. Please try again.';
+            return;
+        }
+    }
 };
 
 // Comment Resolution Form
@@ -448,34 +492,44 @@ const deleteProject = () => {
                 <h3 class="text-2xl font-bold mb-6 text-gray-100">Upload New Video Draft</h3>
 
                 <form @submit.prevent="uploadDraft" class="space-y-4">
-                    <div class="border-2 border-dashed border-white/10 hover:border-indigo-500/50 rounded-xl p-8 text-center cursor-pointer transition-colors relative">
-                        <input type="file" @change="handleFileSelect" class="absolute inset-0 opacity-0 cursor-pointer" accept="video/*" required />
+                    <div class="border-2 border-dashed border-white/10 hover:border-accent/40 rounded-sm p-8 text-center cursor-pointer transition-colors relative">
+                        <input type="file" @change="handleFileSelect" class="absolute inset-0 opacity-0 cursor-pointer" accept="video/*" :required="!uploadFile" :disabled="uploadStatus === 'uploading'" />
                         <div class="space-y-2">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                             </svg>
-                            <div class="text-sm text-gray-300 font-semibold">
-                                {{ uploadForm.video ? uploadForm.video.name : 'Click to upload video file' }}
+                            <div class="text-sm text-gray-300 font-semibold font-mono-technical">
+                                {{ uploadFile ? uploadFile.name : 'Click or drag video file' }}
                             </div>
-                            <p class="text-xs text-gray-400">MP4, MOV, WEBM or MKV (Max 2GB)</p>
+                            <p class="text-xs text-gray-400">MP4, MOV, WEBM or MKV (Unlimited size, chunked)</p>
                         </div>
                     </div>
 
-                    <div v-if="fileSizeMB > 100" class="p-3 bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs rounded-xl flex items-center gap-2">
-                        <span>⚠️ Large file detected ({{ fileSizeMB }} MB). This upload might take a while depending on your network speed.</span>
+                    <div v-if="fileSizeMB > 100 && uploadStatus === 'idle'" class="p-3 bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs rounded-sm flex items-center gap-2">
+                        <span>💡 Large file detected ({{ fileSizeMB }} MB). Using high-performance slice upload.</span>
                     </div>
 
-                    <div v-if="uploadForm.errors.video" class="text-red-500 text-xs text-center mt-2">
-                        {{ uploadForm.errors.video }}
+                    <div v-if="uploadError" class="text-red-500 text-xs text-center mt-2 font-mono-technical">
+                        {{ uploadError }}
                     </div>
 
-                    <div v-if="uploadForm.progress" class="w-full bg-slate-950 rounded-full h-2">
-                        <div class="bg-indigo-500 h-2 rounded-full" :style="`width: ${uploadForm.progress.percentage}%`"></div>
+                    <div v-if="uploadStatus === 'uploading'" class="space-y-1.5">
+                        <div class="flex justify-between text-[10px] text-gray-400 font-mono-technical">
+                            <span>Uploading Chunk {{ chunkIndexInfo.current }} / {{ chunkIndexInfo.total }}</span>
+                            <span class="font-bold text-accent">{{ chunkProgress }}%</span>
+                        </div>
+                        <div class="w-full bg-slate-950 rounded-none h-1 border border-white/5 overflow-hidden">
+                            <div class="bg-accent h-1 transition-all duration-200" :style="`width: ${chunkProgress}%`"></div>
+                        </div>
+                    </div>
+                    
+                    <div v-else-if="uploadStatus === 'success'" class="text-center py-2 text-xs font-mono-technical text-emerald-400 font-bold">
+                        ✓ Merge completed! Finalizing draft...
                     </div>
 
                     <div class="flex justify-end gap-3 pt-4">
-                        <button type="button" @click="showUploadModal = false" class="btn-secondary">Cancel</button>
-                        <button type="submit" class="btn-primary" :disabled="uploadForm.processing">Upload</button>
+                        <button type="button" @click="showUploadModal = false" class="btn-secondary" :disabled="uploadStatus === 'uploading'">Cancel</button>
+                        <button type="submit" class="btn-primary" :disabled="!uploadFile || uploadStatus === 'uploading'">Upload</button>
                     </div>
                 </form>
             </div>

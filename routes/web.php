@@ -28,6 +28,7 @@ Route::middleware('auth')->group(function () {
     // Projects & Drafts CRUD
     Route::resource('projects', ProjectController::class)->except(['index']);
     Route::post('projects/{project}/drafts', [DraftController::class, 'store'])->name('drafts.store');
+    Route::post('projects/{project}/drafts/upload-chunk', [DraftController::class, 'uploadChunk'])->name('drafts.upload-chunk');
     Route::get('projects/{project}/compare', [ProjectController::class, 'compare'])->name('projects.compare');
     Route::post('projects/{project}/archive', [ProjectController::class, 'archive'])->name('projects.archive');
 });
