@@ -52,6 +52,11 @@ const showingNavigationDropdown = ref(false);
                                                 type="button"
                                                 class="inline-flex items-center rounded-sm border border-white/5 bg-[#1c1b1b] px-3 py-2 text-xs font-semibold uppercase tracking-wider text-gray-400 hover:text-white transition duration-150 ease-in-out font-mono-technical focus:outline-none"
                                             >
+                                                <!-- Avatar Placeholder -->
+                                                <div class="w-5 h-5 rounded-full bg-accent/15 border border-accent/30 flex items-center justify-center text-[9px] text-accent font-bold font-mono-technical mr-2 select-none">
+                                                    {{ $page.props.auth.user.name.charAt(0).toUpperCase() }}
+                                                </div>
+
                                                 {{ $page.props.auth.user.name }}
  
                                                 <svg
