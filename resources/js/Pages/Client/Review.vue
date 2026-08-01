@@ -88,10 +88,32 @@ const clearCommentTime = () => {
     commentTime.value = null;
 };
 
+// Image Upload & Lightbox state
+const fileInput = ref(null);
+const imagePreviewUrl = ref(null);
+const selectedLightboxImage = ref(null);
+
+const handleImageSelect = (e) => {
+    const file = e.target.files[0];
+    commentForm.image = file;
+    if (file) {
+        imagePreviewUrl.value = URL.createObjectURL(file);
+    } else {
+        imagePreviewUrl.value = null;
+    }
+};
+
+const removeSelectedImage = () => {
+    commentForm.image = null;
+    imagePreviewUrl.value = null;
+    if (fileInput.value) fileInput.value.value = '';
+};
+
 // Comment Form
 const commentForm = useForm({
     content: '',
     timestamp_seconds: null,
+    image: null,
 });
 
 const submitComment = () => {
@@ -110,6 +132,8 @@ const submitComment = () => {
             console.log('[ClientPortal] Comment submitted successfully!');
             commentForm.reset();
             commentTime.value = null;
+            imagePreviewUrl.value = null;
+            if (fileInput.value) fileInput.value.value = '';
         },
         onError: (errors) => {
             console.error('[ClientPortal] Failed to submit comment. Errors:', errors);
@@ -258,6 +282,24 @@ const showGuide = ref(false);
                     <form @submit.prevent="submitComment" class="space-y-4">
                         <textarea v-model="commentForm.content" @focus="handleCommentFocus" placeholder="Type here... (Video pauses automatically to let you type)" rows="3" class="w-full bg-slate-950/50 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500" required></textarea>
 
+                        <!-- Image Attachment Section -->
+                        <div class="flex items-center gap-4 flex-wrap">
+                            <label class="btn-secondary py-1.5 px-4 text-xs flex items-center gap-2 cursor-pointer border-white/10 text-gray-300 hover:text-white">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                                <span>Attach Image</span>
+                                <input type="file" ref="fileInput" @change="handleImageSelect" accept="image/*" class="hidden" />
+                            </label>
+
+                            <!-- Image Preview Card -->
+                            <div v-if="imagePreviewUrl" class="flex items-center gap-2 bg-slate-950 p-1.5 rounded-lg border border-white/10">
+                                <img :src="imagePreviewUrl" class="h-8 w-12 object-cover rounded" alt="Preview" />
+                                <span class="text-xs text-gray-400 truncate max-w-[120px]">{{ commentForm.image?.name }}</span>
+                                <button type="button" @click="removeSelectedImage" class="text-rose-500 hover:text-rose-400 text-sm font-bold pl-1 font-mono">×</button>
+                            </div>
+                        </div>
+
                         <div class="flex justify-between items-center flex-wrap gap-3">
                             <!-- Timestamp Checkbox -->
                             <div v-if="commentTime !== null" class="flex items-center gap-2 text-xs bg-indigo-500/10 px-3 py-1.5 rounded-lg border border-indigo-500/20">
@@ -315,6 +357,16 @@ const showGuide = ref(false);
                                         <span class="text-xs text-gray-400 font-bold">{{ comment.author_name }}</span>
                                     </div>
                                     <p class="text-sm text-gray-200 leading-relaxed">{{ comment.content }}</p>
+                                    
+                                    <!-- Image Attachment Thumbnail -->
+                                    <div v-if="comment.image_url" class="mt-2.5">
+                                        <img 
+                                            :src="comment.image_url" 
+                                            @click="selectedLightboxImage = comment.image_url" 
+                                            class="h-16 w-24 object-cover rounded-lg border border-white/10 hover:border-indigo-500/50 cursor-pointer transition-all hover:scale-105" 
+                                            alt="Attachment" 
+                                        />
+                                    </div>
                                     
                                     <!-- Decline reason banner -->
                                     <div v-if="comment.is_rejected" class="mt-2 p-2 bg-rose-500/5 border border-rose-500/10 rounded-lg text-xs text-rose-300 flex items-start gap-1.5">
@@ -378,6 +430,16 @@ const showGuide = ref(false);
                     </div>
                 </form>
             </div>
+        </div>
+        
+        <!-- Fullscreen Image Lightbox Modal -->
+        <div v-if="selectedLightboxImage" @click="selectedLightboxImage = null" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md cursor-pointer animate-fade-in">
+            <div class="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </div>
+            <img :src="selectedLightboxImage" class="max-w-full max-h-[90vh] object-contain rounded-xl shadow-2xl border border-white/5 cursor-default" @click.stop />
         </div>
     </div>
 </template>

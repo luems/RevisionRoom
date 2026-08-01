@@ -129,6 +129,8 @@ onUnmounted(() => {
         player1.value.removeEventListener('loadedmetadata', handleLoadedMetadata);
     }
 });
+
+const selectedLightboxImage = ref(null);
 </script>
 
 <template>
@@ -255,6 +257,9 @@ onUnmounted(() => {
                                                 <span class="font-bold text-gray-400">{{ c.author_name }}</span>
                                             </div>
                                             <p class="text-gray-200 leading-relaxed">{{ c.content }}</p>
+                                            <div v-if="c.image_url" class="mt-2 text-left">
+                                                <img :src="c.image_url" @click="selectedLightboxImage = c.image_url" class="h-10 w-16 object-cover rounded border border-white/10 hover:border-indigo-500/50 cursor-pointer transition-all hover:scale-105" alt="Attachment" />
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -275,6 +280,9 @@ onUnmounted(() => {
                                                 <span class="font-bold text-gray-400">{{ c.author_name }}</span>
                                             </div>
                                             <p class="text-gray-200 leading-relaxed">{{ c.content }}</p>
+                                            <div v-if="c.image_url" class="mt-2 text-left">
+                                                <img :src="c.image_url" @click="selectedLightboxImage = c.image_url" class="h-10 w-16 object-cover rounded border border-white/10 hover:border-indigo-500/50 cursor-pointer transition-all hover:scale-105" alt="Attachment" />
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -304,6 +312,16 @@ onUnmounted(() => {
 
                 </div>
             </div>
+        </div>
+
+        <!-- Fullscreen Image Lightbox Modal -->
+        <div v-if="selectedLightboxImage" @click="selectedLightboxImage = null" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md cursor-pointer animate-fade-in">
+            <div class="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </div>
+            <img :src="selectedLightboxImage" class="max-w-full max-h-[90vh] object-contain rounded-xl shadow-2xl border border-white/5 cursor-default" @click.stop />
         </div>
     </AuthenticatedLayout>
 </template>

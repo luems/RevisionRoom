@@ -11,20 +11,27 @@ class CommentController extends Controller
 {
     public function store(Request $request, $draftId)
     {
-        $draft = Draft::with('project')->findOrFail($draftId);
+        $draft = Draft::findOrFail($draftId);
 
         $request->validate([
             'content' => 'required|string',
             'timestamp_seconds' => 'nullable|numeric',
+            'image' => 'nullable|image|max:10240', // Max 10MB
         ]);
+
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('comments', 'public');
+        }
 
         $comment = Comment::create([
             'draft_id' => $draft->id,
             'user_id' => Auth::id(),
-            'author_name' => Auth::check() ? Auth::user()->name : 'Guest Client',
+            'author_name' => Auth::user()?->name ?? $request->input('author_name', 'Client'),
             'content' => $request->content,
             'timestamp_seconds' => $request->timestamp_seconds,
             'is_resolved' => false,
+            'image_path' => $imagePath,
         ]);
 
         return redirect()->back()->with('success', 'Comment added.');
