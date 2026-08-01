@@ -77,7 +77,8 @@ const activeTab = ref('sync');
 
             <!-- Main Headline -->
             <h1 class="text-4xl sm:text-6xl lg:text-7xl font-editorial font-bold text-gray-100 tracking-tight leading-[1.1] max-w-5xl mx-auto">
-                Hello World
+                Frame-Accurate Video Review & <br class="hidden sm:block" />
+                <span class="bg-gradient-to-r from-accent via-emerald-400 to-indigo-400 bg-clip-text text-transparent">Instant Client Approvals</span>
             </h1>
 
             <!-- Subtitle -->
