@@ -140,6 +140,10 @@ const uploadDraft = async () => {
                     const chunkUploadedPercent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
                     const overallPercent = Math.round(((index * 100) + chunkUploadedPercent) / totalChunks);
                     chunkProgress.value = Math.min(overallPercent, 99); // Let the completed status set 100
+
+                    if (index === totalChunks - 1 && chunkUploadedPercent === 100) {
+                        uploadStatus.value = 'merging';
+                    }
                 }
             });
 
@@ -528,8 +532,18 @@ const deleteProject = () => {
                         <div class="w-full bg-slate-950 rounded-none h-2 border border-white/5 overflow-hidden">
                             <div class="bg-accent h-2 transition-all duration-200" :style="`width: ${chunkProgress}%`"></div>
                         </div>
+                    </div>
+                    
+                    <div v-else-if="uploadStatus === 'merging'" class="space-y-2">
+                        <div class="flex justify-between text-xs text-gray-400 font-mono-technical animate-pulse">
+                            <span>Assembling video chunks on server...</span>
+                            <span class="font-bold text-accent">99%</span>
+                        </div>
+                        <div class="w-full bg-slate-950 rounded-none h-2 border border-white/5 overflow-hidden">
+                            <div class="bg-accent h-2 transition-all duration-200" style="width: 99%"></div>
+                        </div>
                         <div class="text-[9px] text-gray-500 font-mono-technical text-right">
-                            Chunk {{ chunkIndexInfo.current }} of {{ chunkIndexInfo.total }}
+                            Writing to disk, please do not close this window
                         </div>
                     </div>
                     

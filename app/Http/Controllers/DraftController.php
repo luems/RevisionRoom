@@ -149,7 +149,7 @@ class DraftController extends Controller
             for ($i = 0; $i < $totalChunks; $i++) {
                 $chunkPath = "{$tempDir}/chunk_{$i}";
                 $in = fopen($chunkPath, "rb");
-                while ($buff = fread($in, 4096)) {
+                while ($buff = fread($in, 262144)) {
                     fwrite($out, $buff);
                 }
                 fclose($in);
