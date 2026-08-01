@@ -201,6 +201,13 @@ class DraftController extends Controller
             // Dispatch background processing job
             ProcessVideoDraft::dispatch($draft);
 
+            // Pop a background queue worker to run immediately in the background without blocking the HTTP thread
+            if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+                pclose(popen("start /B cmd /C php artisan queue:work --once > NUL 2>&1", "r"));
+            } else {
+                shell_exec("php artisan queue:work --once > /dev/null 2>&1 &");
+            }
+
             return response()->json([
                 'status' => 'completed',
                 'version' => $nextVersion,

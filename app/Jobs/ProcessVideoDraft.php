@@ -76,7 +76,7 @@ class ProcessVideoDraft implements ShouldQueue
             $thumbSec = $duration > 2.0 ? 2.0 : $duration / 2.0;
 
             try {
-                $cmdThumb = "ffmpeg -y -ss " . $thumbSec . " -i " . escapeshellarg($localVideoPath) . " -vframes 1 " . escapeshellarg($localThumbPath) . " 2>&1";
+                $cmdThumb = "ffmpeg -y -nostdin -ss " . $thumbSec . " -i " . escapeshellarg($localVideoPath) . " -vframes 1 " . escapeshellarg($localThumbPath) . " 2>&1";
                 shell_exec($cmdThumb);
             } catch (\Exception $e) {
                 Log::warning("FFMpeg direct command failed: " . $e->getMessage());
