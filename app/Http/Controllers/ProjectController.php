@@ -73,11 +73,19 @@ class ProjectController extends Controller
     public function compare($id, Request $request)
     {
         $project = Project::where('editor_id', Auth::id())
-            ->with(['drafts'])
+            ->with(['drafts' => function ($q) {
+                $q->orderBy('version_number', 'desc');
+            }])
             ->findOrFail($id);
 
         $draft1Id = $request->query('draft1');
         $draft2Id = $request->query('draft2');
+
+        // Fallback to latest two drafts if missing
+        if ((!$draft1Id || !$draft2Id) && $project->drafts->count() >= 2) {
+            $draft1Id = $draft1Id ?: $project->drafts->last()->id;
+            $draft2Id = $draft2Id ?: $project->drafts->first()->id;
+        }
 
         $draft1 = $project->drafts->firstWhere('id', $draft1Id);
         $draft2 = $project->drafts->firstWhere('id', $draft2Id);
@@ -97,6 +105,7 @@ class ProjectController extends Controller
             'project' => $project,
             'draft1' => $draft1,
             'draft2' => $draft2,
+            'is_client' => false,
         ]);
     }
 

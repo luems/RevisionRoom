@@ -1,5 +1,5 @@
 <script setup>
-import { Head, useForm, router } from '@inertiajs/vue3';
+import { Head, Link, useForm, router } from '@inertiajs/vue3';
 import { ref, computed, watch, onUnmounted, onMounted } from 'vue';
 
 const props = defineProps({
@@ -8,6 +8,8 @@ const props = defineProps({
 });
 
 const currentDraftIndex = ref(0);
+const selectedDraft1 = ref('');
+const selectedDraft2 = ref('');
 const videoPlayer = ref(null);
 const commentTime = ref(null);
 const includeTimestamp = ref(true);
@@ -45,6 +47,10 @@ const stopPolling = () => {
 
 onMounted(() => {
     startPolling();
+    if (props.project.drafts && props.project.drafts.length >= 2) {
+        selectedDraft1.value = props.project.drafts[props.project.drafts.length - 1].id;
+        selectedDraft2.value = props.project.drafts[0].id;
+    }
 });
 
 onUnmounted(() => {
@@ -291,6 +297,38 @@ const showGuide = ref(false);
                                     v{{ draft.version_number }}
                                 </button>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Version Comparison Control for Client -->
+                <div v-if="project.drafts && project.drafts.length > 1" class="glass-card p-6">
+                    <div class="flex items-center justify-between flex-wrap gap-4">
+                        <div>
+                            <h3 class="font-bold text-sm uppercase tracking-wider font-mono-technical text-gray-200 flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                                </svg>
+                                Synchronized Version Comparison
+                            </h3>
+                            <p class="text-xs text-gray-400 mt-1 font-mono-technical">Compare two draft versions side-by-side with synchronized playback.</p>
+                        </div>
+                        <div class="flex items-center gap-3 flex-wrap">
+                            <div class="flex items-center gap-2 text-xs font-mono-technical">
+                                <span class="text-gray-400">Compare v:</span>
+                                <select v-model="selectedDraft1" class="bg-slate-950 border border-white/10 rounded-sm text-xs py-1.5 px-3 text-white font-mono-technical focus:border-accent">
+                                    <option v-for="d in project.drafts" :key="d.id" :value="d.id">v{{ d.version_number }}</option>
+                                </select>
+                            </div>
+                            <div class="flex items-center gap-2 text-xs font-mono-technical">
+                                <span class="text-gray-400">with v:</span>
+                                <select v-model="selectedDraft2" class="bg-slate-950 border border-white/10 rounded-sm text-xs py-1.5 px-3 text-white font-mono-technical focus:border-accent">
+                                    <option v-for="d in project.drafts" :key="d.id" :value="d.id">v{{ d.version_number }}</option>
+                                </select>
+                            </div>
+                            <Link :href="route('client.projects.compare', [project.share_token])" :data="{ draft1: selectedDraft1, draft2: selectedDraft2 }" class="btn-primary py-1.5 px-4 text-xs font-mono-technical">
+                                Compare Side-by-Side →
+                            </Link>
                         </div>
                     </div>
                 </div>

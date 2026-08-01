@@ -36,6 +36,7 @@ Route::middleware('auth')->group(function () {
 // Client Portal & Shared routes (no password auth or magic auth)
 Route::get('review/{share_token}', [ClientPortalController::class, 'loginWithToken'])->name('client.projects.login');
 Route::get('review/{share_token}/portal', [ClientPortalController::class, 'showProject'])->name('client.projects.show');
+Route::get('review/{share_token}/compare', [ClientPortalController::class, 'compare'])->name('client.projects.compare');
 
 // Comments & Approvals (Accessible by client and editor)
 Route::post('drafts/{draft}/comments', [CommentController::class, 'store'])->name('comments.store');

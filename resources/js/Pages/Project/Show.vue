@@ -275,6 +275,10 @@ onMounted(() => {
         Notification.requestPermission();
     }
     startPolling();
+    if (props.project.drafts && props.project.drafts.length >= 2) {
+        selectedDraft1.value = props.project.drafts[props.project.drafts.length - 1].id;
+        selectedDraft2.value = props.project.drafts[0].id;
+    }
 });
 </script>
 

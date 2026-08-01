@@ -7,6 +7,7 @@ const props = defineProps({
     project: Object,
     draft1: Object,
     draft2: Object,
+    is_client: Boolean,
 });
 
 const player1 = ref(null);
@@ -276,7 +277,7 @@ const selectedLightboxImage = ref(null);
                     <h2 class="text-3xl font-editorial tracking-tight text-gray-100">Version Comparison</h2>
                     <p class="text-xs text-gray-400 mt-1.5 font-mono-technical uppercase tracking-wider">{{ project.name }}</p>
                 </div>
-                <Link :href="route('projects.show', project.id)" class="btn-secondary text-xs flex items-center gap-1">
+                <Link :href="is_client ? route('client.projects.show', project.share_token) : route('projects.show', project.id)" class="btn-secondary text-xs flex items-center gap-1">
                     ← Return to Project
                 </Link>
             </div>

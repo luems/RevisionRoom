@@ -65,4 +65,51 @@ class ClientPortalController extends Controller
 
         return redirect()->back()->with('success', 'Revision batch submitted to editor.');
     }
+
+    /**
+     * Show the version comparison view for client
+     */
+    public function compare(Request $request, $share_token)
+    {
+        $project = Project::where('share_token', $share_token)
+            ->with(['drafts' => function ($q) {
+                $q->orderBy('version_number', 'desc');
+            }])
+            ->firstOrFail();
+
+        // Auto-login the associated client if not logged in
+        if ($project->client_id && (!Auth::check() || (Auth::user()->role === 'client' && Auth::id() !== $project->client_id))) {
+            Auth::login($project->client);
+        }
+
+        $draft1Id = $request->query('draft1');
+        $draft2Id = $request->query('draft2');
+
+        // Fallback to latest two drafts if not provided
+        if ((!$draft1Id || !$draft2Id) && $project->drafts->count() >= 2) {
+            $draft1Id = $draft1Id ?: $project->drafts->last()->id; // Older version
+            $draft2Id = $draft2Id ?: $project->drafts->first()->id; // Latest version
+        }
+
+        $draft1 = $project->drafts->firstWhere('id', $draft1Id);
+        $draft2 = $project->drafts->firstWhere('id', $draft2Id);
+
+        if ($draft1) {
+            $draft1->load(['comments' => function($q) {
+                $q->orderBy('timestamp_seconds', 'asc');
+            }, 'comments.user']);
+        }
+        if ($draft2) {
+            $draft2->load(['comments' => function($q) {
+                $q->orderBy('timestamp_seconds', 'asc');
+            }, 'comments.user']);
+        }
+
+        return Inertia::render('Project/Compare', [
+            'project' => $project,
+            'draft1' => $draft1,
+            'draft2' => $draft2,
+            'is_client' => true,
+        ]);
+    }
 }
