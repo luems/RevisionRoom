@@ -17,11 +17,7 @@ const activeFeature = ref('sync');
     <div class="min-h-screen bg-[#131313] text-gray-100 font-sans selection:bg-accent selection:text-[#131313] relative overflow-x-hidden">
         
         <!-- Subtle Background Grid Pattern -->
-        <div class="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.05)_1px,transparent_1px)] [background-size:32px_32px] pointer-events-none"></div>
-
-        <!-- Ambient Glowing Background Orbs -->
-        <div class="absolute top-[-100px] left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-accent/10 rounded-full blur-[160px] pointer-events-none"></div>
-        <div class="absolute top-[1200px] right-[-100px] w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[160px] pointer-events-none"></div>
+        <div class="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.03)_1px,transparent_1px)] [background-size:32px_32px] pointer-events-none"></div>
 
         <!-- Sticky Header Navigation -->
         <header class="border-b border-white/5 bg-[#131313]/90 backdrop-blur-xl px-6 py-4 sticky top-0 z-50">
@@ -29,7 +25,7 @@ const activeFeature = ref('sync');
                 
                 <!-- Logo -->
                 <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-md bg-accent flex items-center justify-center text-[#131313] font-black text-base shadow-[0_0_15px_rgba(203,251,69,0.3)]">
+                    <div class="w-8 h-8 rounded-md bg-accent flex items-center justify-center text-[#131313] font-black text-base">
                         R
                     </div>
                     <span class="text-xl font-editorial font-bold text-gray-100 tracking-tight">RevisionRoom</span>
@@ -70,8 +66,8 @@ const activeFeature = ref('sync');
         <section class="relative pt-20 pb-16 px-6 max-w-7xl mx-auto text-center space-y-8 z-10">
             
             <!-- Top Announcement Pill -->
-            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-mono-technical text-gray-300 hover:border-accent/40 transition-colors shadow-inner cursor-pointer">
-                <span class="w-2 h-2 rounded-full bg-accent animate-pulse"></span>
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-mono-technical text-gray-300 hover:border-accent/40 transition-colors shadow-sm cursor-pointer">
+                <span class="w-2 h-2 rounded-full bg-accent"></span>
                 <span>Introducing Synchronized Dual-Player Comparison</span>
                 <span class="text-accent font-bold">Explore →</span>
             </div>
@@ -79,7 +75,7 @@ const activeFeature = ref('sync');
             <!-- Hero Headline -->
             <h1 class="text-4xl sm:text-6xl lg:text-7xl font-editorial font-bold text-gray-100 tracking-tight leading-[1.1] max-w-5xl mx-auto">
                 Work on all your video revisions <br class="hidden sm:block" />
-                <span class="text-accent drop-shadow-[0_0_35px_rgba(203,251,69,0.3)]">in one single place.</span>
+                <span class="text-accent">in one single place.</span>
             </h1>
 
             <!-- Subtitle -->
@@ -89,13 +85,13 @@ const activeFeature = ref('sync');
 
             <!-- CTA Buttons -->
             <div class="flex items-center justify-center gap-4 flex-wrap pt-2">
-                <Link v-if="!auth_user" :href="route('register')" class="btn-primary py-3.5 px-8 text-sm font-bold font-mono-technical uppercase tracking-wider flex items-center gap-2 text-[#131313] shadow-[0_0_25px_rgba(203,251,69,0.3)] hover:scale-105 transition-all">
+                <Link v-if="!auth_user" :href="route('register')" class="btn-primary py-3.5 px-8 text-sm font-bold font-mono-technical uppercase tracking-wider flex items-center gap-2 text-[#131313] hover:scale-105 transition-all">
                     <span>Start Free Trial</span>
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                 </Link>
-                <Link v-else :href="route('dashboard')" class="btn-primary py-3.5 px-8 text-sm font-bold font-mono-technical uppercase tracking-wider flex items-center gap-2 text-[#131313] shadow-[0_0_25px_rgba(203,251,69,0.3)] hover:scale-105 transition-all">
+                <Link v-else :href="route('dashboard')" class="btn-primary py-3.5 px-8 text-sm font-bold font-mono-technical uppercase tracking-wider flex items-center gap-2 text-[#131313] hover:scale-105 transition-all">
                     <span>Open Dashboard</span>
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -114,7 +110,7 @@ const activeFeature = ref('sync');
             <div class="pt-8 relative max-w-6xl mx-auto">
                 
                 <!-- Floating Widget Left: Comment Bubble -->
-                <div class="hidden lg:flex absolute -left-12 top-24 z-20 p-3 rounded-xl bg-[#1c1b1b]/90 border border-white/10 backdrop-blur-xl shadow-2xl items-center gap-3 animate-bounce [animation-duration:4s]">
+                <div class="hidden lg:flex absolute -left-12 top-24 z-20 p-3 rounded-xl bg-[#1c1b1b] border border-white/10 shadow-xl items-center gap-3">
                     <div class="w-8 h-8 rounded-full bg-accent/20 border border-accent/40 flex items-center justify-center text-accent font-bold text-xs font-mono">
                         0:14
                     </div>
@@ -125,8 +121,8 @@ const activeFeature = ref('sync');
                 </div>
 
                 <!-- Floating Widget Right: Sync Status Badge -->
-                <div class="hidden lg:flex absolute -right-10 top-36 z-20 p-3 rounded-xl bg-[#1c1b1b]/90 border border-white/10 backdrop-blur-xl shadow-2xl items-center gap-3">
-                    <div class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></div>
+                <div class="hidden lg:flex absolute -right-10 top-36 z-20 p-3 rounded-xl bg-[#1c1b1b] border border-white/10 shadow-xl items-center gap-3">
+                    <div class="w-2.5 h-2.5 rounded-full bg-emerald-400"></div>
                     <div class="text-left text-xs font-mono-technical">
                         <div class="font-bold text-emerald-400">Sync Corrected (0.00s)</div>
                         <div class="text-[10px] text-gray-400">Dual-Player Active</div>
@@ -134,7 +130,7 @@ const activeFeature = ref('sync');
                 </div>
 
                 <!-- Main Glassmorphic Showcase Container -->
-                <div class="glass-card p-4 sm:p-6 bg-[#1a1a1a]/70 border border-white/10 rounded-2xl shadow-2xl overflow-hidden relative group">
+                <div class="glass-card p-4 sm:p-6 bg-[#1a1a1a] border border-white/10 rounded-2xl shadow-xl overflow-hidden relative group">
                     <div class="flex justify-between items-center px-4 py-3 bg-[#131313] rounded-xl border border-white/5 mb-4">
                         <div class="flex items-center gap-2">
                             <div class="w-3 h-3 rounded-full bg-rose-500/80"></div>
@@ -155,7 +151,7 @@ const activeFeature = ref('sync');
                                 <span class="bg-accent text-[#131313] font-bold font-mono-technical text-[10px] px-2 py-0.5 rounded uppercase">v1 (Original)</span>
                                 <span class="text-[10px] font-mono-technical text-gray-400">1080p // 24fps</span>
                             </div>
-                            <div class="self-center w-12 h-12 rounded-full bg-white/20 border border-white/30 backdrop-blur-md flex items-center justify-center text-white cursor-pointer group-hover/p1:scale-110 transition-transform">
+                            <div class="self-center w-12 h-12 rounded-full bg-white/20 border border-white/30 flex items-center justify-center text-white cursor-pointer group-hover/p1:scale-110 transition-transform">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 ml-0.5" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
                             </div>
                             <div class="w-full bg-white/10 h-1 rounded-full relative z-10"><div class="w-1/3 h-full bg-accent rounded-full"></div></div>
@@ -167,7 +163,7 @@ const activeFeature = ref('sync');
                                 <span class="bg-accent text-[#131313] font-bold font-mono-technical text-[10px] px-2 py-0.5 rounded uppercase">v2 (Latest Cut)</span>
                                 <span class="text-[10px] font-mono-technical text-emerald-400 font-bold">● Active Revision</span>
                             </div>
-                            <div class="self-center w-12 h-12 rounded-full bg-accent flex items-center justify-center text-[#131313] shadow-lg cursor-pointer group-hover/p2:scale-110 transition-transform">
+                            <div class="self-center w-12 h-12 rounded-full bg-accent flex items-center justify-center text-[#131313] shadow-md cursor-pointer group-hover/p2:scale-110 transition-transform">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 ml-0.5" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
                             </div>
                             <div class="w-full bg-white/10 h-1 rounded-full relative z-10"><div class="w-1/3 h-full bg-accent rounded-full"></div></div>
@@ -178,22 +174,8 @@ const activeFeature = ref('sync');
             </div>
         </section>
 
-        <!-- 2. LOGO TICKER / METRIC PROOF BAR -->
-        <section class="py-12 border-y border-white/5 bg-[#161515]">
-            <div class="max-w-7xl mx-auto px-6 text-center space-y-4">
-                <span class="text-[11px] font-mono-technical uppercase tracking-widest text-gray-500 font-bold">Trusted by Editors, Post Houses & Agencies Worldwide</span>
-                <div class="flex items-center justify-center gap-8 sm:gap-16 flex-wrap text-sm font-mono-technical text-gray-400 font-bold">
-                    <span class="hover:text-accent transition-colors">🎞️ FRAME.ACCURATE</span>
-                    <span class="hover:text-accent transition-colors">⚡ FFmpeg.FAST</span>
-                    <span class="hover:text-accent transition-colors">🔄 SYNC.PLAYBACK</span>
-                    <span class="hover:text-accent transition-colors">📄 PDF.CERTIFIED</span>
-                    <span class="hover:text-accent transition-colors">🔒 MAGIC.LINKS</span>
-                </div>
-            </div>
-        </section>
-
-        <!-- 3. FEATURE SECTION 1: SIDE-BY-SIDE SYNC PLAYER -->
-        <section id="compare" class="py-24 px-6 max-w-7xl mx-auto relative z-10 space-y-16">
+        <!-- 2. FEATURE SECTION: SIDE-BY-SIDE SYNC PLAYER -->
+        <section id="compare" class="py-20 px-6 max-w-7xl mx-auto relative z-10 space-y-16">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 
                 <!-- Left Text Column -->
@@ -224,11 +206,11 @@ const activeFeature = ref('sync');
                 </div>
 
                 <!-- Right Graphic Box -->
-                <div class="glass-card p-6 bg-[#1a1a1a]/60 border border-white/10 rounded-2xl relative overflow-hidden shadow-2xl">
+                <div class="glass-card p-6 bg-[#1a1a1a] border border-white/10 rounded-2xl relative overflow-hidden shadow-xl">
                     <div class="space-y-4">
                         <div class="p-4 bg-slate-950 rounded-xl border border-white/5 flex items-center justify-between text-xs font-mono-technical">
                             <span class="text-gray-400">Master Clock: <span class="text-accent font-bold">01:24.08</span></span>
-                            <span class="text-emerald-400 font-bold">● Both Ready (canplaythrough)</span>
+                            <span class="text-emerald-400 font-bold">● Both Ready</span>
                         </div>
                         <div class="p-4 bg-white/5 rounded-xl border border-white/5 text-xs space-y-2">
                             <div class="flex justify-between items-center text-[10px] font-mono-technical">
@@ -250,7 +232,7 @@ const activeFeature = ref('sync');
             </div>
         </section>
 
-        <!-- 4. FEATURE BENTO GRID SECTION -->
+        <!-- 3. FEATURE BENTO GRID SECTION -->
         <section id="features" class="py-20 px-6 max-w-7xl mx-auto relative z-10 space-y-12">
             <div class="text-center space-y-4">
                 <span class="text-xs font-mono-technical uppercase tracking-widest text-accent font-bold">Built For High-Speed Workflows</span>
@@ -262,7 +244,7 @@ const activeFeature = ref('sync');
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 
                 <!-- Bento Card 1: Clipboard Screenshot Paste -->
-                <div class="glass-card p-6 bg-[#1a1a1a]/50 border border-white/5 hover:border-accent/40 transition-all duration-300 space-y-4 flex flex-col justify-between">
+                <div class="glass-card p-6 bg-[#1a1a1a] border border-white/5 hover:border-accent/40 transition-all duration-300 space-y-4 flex flex-col justify-between">
                     <div class="space-y-3">
                         <div class="w-10 h-10 rounded-lg bg-accent/10 border border-accent/20 flex items-center justify-center text-accent font-bold">
                             📋
@@ -277,7 +259,7 @@ const activeFeature = ref('sync');
                 </div>
 
                 <!-- Bento Card 2: Passwordless Magic Links -->
-                <div class="glass-card p-6 bg-[#1a1a1a]/50 border border-white/5 hover:border-emerald-500/40 transition-all duration-300 space-y-4 flex flex-col justify-between">
+                <div class="glass-card p-6 bg-[#1a1a1a] border border-white/5 hover:border-emerald-500/40 transition-all duration-300 space-y-4 flex flex-col justify-between">
                     <div class="space-y-3">
                         <div class="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold">
                             🔗
@@ -291,7 +273,7 @@ const activeFeature = ref('sync');
                 </div>
 
                 <!-- Bento Card 3: Verifiable PDF Certificates -->
-                <div class="glass-card p-6 bg-[#1a1a1a]/50 border border-white/5 hover:border-sky-500/40 transition-all duration-300 space-y-4 flex flex-col justify-between">
+                <div class="glass-card p-6 bg-[#1a1a1a] border border-white/5 hover:border-sky-500/40 transition-all duration-300 space-y-4 flex flex-col justify-between">
                     <div class="space-y-3">
                         <div class="w-10 h-10 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400 font-bold">
                             📄
@@ -308,16 +290,12 @@ const activeFeature = ref('sync');
             </div>
         </section>
 
-        <!-- 5. DRAMATIC DARK SECTION: HORIZON GLOW & TECH SPECS -->
-        <section id="tech" class="py-28 px-6 bg-gradient-to-b from-[#131313] via-[#0d0d0d] to-[#131313] relative overflow-hidden border-t border-white/5">
-            
-            <!-- Curved Horizon Light Beam Glow -->
-            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[300px] bg-gradient-to-b from-accent/20 via-indigo-500/10 to-transparent rounded-b-[100%] blur-3xl pointer-events-none"></div>
-
-            <div class="max-w-7xl mx-auto text-center space-y-16 relative z-10">
-                <div class="space-y-4">
-                    <span class="text-xs font-mono-technical uppercase tracking-widest text-accent font-bold">Universal Post-Production Architecture</span>
-                    <h2 class="text-4xl sm:text-6xl font-editorial font-bold text-gray-100">Engineered for Video Teams</h2>
+        <!-- 4. TECH SPECS SECTION -->
+        <section id="tech" class="py-20 px-6 bg-[#0f0e0e] border-t border-white/5">
+            <div class="max-w-7xl mx-auto text-center space-y-12">
+                <div class="space-y-3">
+                    <span class="text-xs font-mono-technical uppercase tracking-widest text-accent font-bold">Post-Production Architecture</span>
+                    <h2 class="text-3xl sm:text-5xl font-editorial font-bold text-gray-100">Engineered for Video Teams</h2>
                     <p class="text-gray-400 text-sm sm:text-base max-w-xl mx-auto">High-performance video streaming powered by chunked uploads, FFmpeg background queue workers, and Inertia live polling.</p>
                 </div>
 
@@ -343,8 +321,8 @@ const activeFeature = ref('sync');
             </div>
         </section>
 
-        <!-- 6. STEP-BY-STEP WORKFLOW TIMELINE -->
-        <section id="workflow" class="py-24 px-6 max-w-7xl mx-auto relative z-10 space-y-16">
+        <!-- 5. STEP-BY-STEP WORKFLOW TIMELINE -->
+        <section id="workflow" class="py-20 px-6 max-w-7xl mx-auto relative z-10 space-y-16">
             <div class="text-center space-y-4">
                 <span class="text-xs font-mono-technical uppercase tracking-widest text-accent font-bold">End-to-End Workflow</span>
                 <h2 class="text-3xl sm:text-5xl font-editorial font-bold text-gray-100">From raw edit to final sign-off in 4 steps.</h2>
@@ -352,28 +330,28 @@ const activeFeature = ref('sync');
 
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <!-- Step 1 -->
-                <div class="p-6 bg-[#1a1a1a]/40 border border-white/5 rounded-xl space-y-3 relative">
+                <div class="p-6 bg-[#1a1a1a] border border-white/5 rounded-xl space-y-3 relative">
                     <span class="text-3xl font-mono-technical font-bold text-accent">01</span>
                     <h4 class="font-editorial font-bold text-gray-200 text-lg">Upload Draft</h4>
                     <p class="text-xs text-gray-400 leading-relaxed">Chunked background upload processes large video files into streamable H.264 formats.</p>
                 </div>
 
                 <!-- Step 2 -->
-                <div class="p-6 bg-[#1a1a1a]/40 border border-white/5 rounded-xl space-y-3 relative">
+                <div class="p-6 bg-[#1a1a1a] border border-white/5 rounded-xl space-y-3 relative">
                     <span class="text-3xl font-mono-technical font-bold text-emerald-400">02</span>
                     <h4 class="font-editorial font-bold text-gray-200 text-lg">Send Magic Link</h4>
                     <p class="text-xs text-gray-400 leading-relaxed">Copy and send the passwordless share link to clients. Instant access on mobile or desktop.</p>
                 </div>
 
                 <!-- Step 3 -->
-                <div class="p-6 bg-[#1a1a1a]/40 border border-white/5 rounded-xl space-y-3 relative">
+                <div class="p-6 bg-[#1a1a1a] border border-white/5 rounded-xl space-y-3 relative">
                     <span class="text-3xl font-mono-technical font-bold text-indigo-400">03</span>
                     <h4 class="font-editorial font-bold text-gray-200 text-lg">Collect Revisions</h4>
                     <p class="text-xs text-gray-400 leading-relaxed">Clients leave frame-locked comments and paste screenshots. Editor views live sync automatically.</p>
                 </div>
 
                 <!-- Step 4 -->
-                <div class="p-6 bg-[#1a1a1a]/40 border border-white/5 rounded-xl space-y-3 relative">
+                <div class="p-6 bg-[#1a1a1a] border border-white/5 rounded-xl space-y-3 relative">
                     <span class="text-3xl font-mono-technical font-bold text-sky-400">04</span>
                     <h4 class="font-editorial font-bold text-gray-200 text-lg">Get PDF Sign-off</h4>
                     <p class="text-xs text-gray-400 leading-relaxed">Client signs off on final cut. Project locks and generates a verified approval PDF certificate.</p>
@@ -381,9 +359,9 @@ const activeFeature = ref('sync');
             </div>
         </section>
 
-        <!-- 7. TESTIMONIAL / CUSTOMER QUOTE HIGHLIGHT -->
+        <!-- 6. TESTIMONIAL / CUSTOMER QUOTE HIGHLIGHT -->
         <section class="py-16 px-6 max-w-5xl mx-auto relative z-10">
-            <div class="glass-card p-8 sm:p-12 bg-[#1a1a1a]/50 border border-white/10 rounded-2xl text-center space-y-6 shadow-2xl">
+            <div class="glass-card p-8 sm:p-12 bg-[#1a1a1a] border border-white/10 rounded-2xl text-center space-y-6 shadow-xl">
                 <div class="text-accent text-3xl font-serif">“</div>
                 <blockquote class="text-xl sm:text-2xl font-editorial font-bold text-gray-100 max-w-3xl mx-auto leading-relaxed">
                     RevisionRoom cut our commercial video review cycles from 5 days down to 4 hours. The dual sync comparison player completely stopped client confusion on version changes.
@@ -395,12 +373,9 @@ const activeFeature = ref('sync');
             </div>
         </section>
 
-        <!-- 8. BIG CTA BANNER WITH CURVED ARC GLOW -->
+        <!-- 7. CLEAN CTA BANNER -->
         <section class="py-20 px-6 max-w-7xl mx-auto relative z-10">
-            <div class="glass-card p-10 sm:p-16 bg-gradient-to-b from-[#1c1b1b] to-[#131313] border border-white/10 rounded-3xl text-center space-y-8 relative overflow-hidden shadow-2xl">
-                <!-- Arc Glow background -->
-                <div class="absolute -top-24 left-1/2 -translate-x-1/2 w-[600px] h-[200px] bg-accent/20 rounded-b-full blur-3xl pointer-events-none"></div>
-
+            <div class="glass-card p-10 sm:p-16 bg-[#1c1b1b] border border-white/10 rounded-3xl text-center space-y-8 shadow-xl">
                 <h2 class="text-3xl sm:text-5xl font-editorial font-bold text-gray-100 leading-tight">
                     Start reviewing video drafts <br class="hidden sm:block" />
                     with your clients today.
@@ -410,17 +385,17 @@ const activeFeature = ref('sync');
                 </p>
 
                 <div class="pt-4 flex justify-center items-center gap-4 flex-wrap">
-                    <Link v-if="!auth_user" :href="route('register')" class="btn-primary py-4 px-9 text-sm font-bold font-mono-technical uppercase tracking-wider text-[#131313] shadow-[0_0_30px_rgba(203,251,69,0.4)] hover:scale-105 transition-all">
+                    <Link v-if="!auth_user" :href="route('register')" class="btn-primary py-4 px-9 text-sm font-bold font-mono-technical uppercase tracking-wider text-[#131313] hover:scale-105 transition-all">
                         Create Free Workspace →
                     </Link>
-                    <Link v-else :href="route('dashboard')" class="btn-primary py-4 px-9 text-sm font-bold font-mono-technical uppercase tracking-wider text-[#131313] shadow-[0_0_30px_rgba(203,251,69,0.4)] hover:scale-105 transition-all">
+                    <Link v-else :href="route('dashboard')" class="btn-primary py-4 px-9 text-sm font-bold font-mono-technical uppercase tracking-wider text-[#131313] hover:scale-105 transition-all">
                         Go to Dashboard →
                     </Link>
                 </div>
             </div>
         </section>
 
-        <!-- 9. MULTI-COLUMN FOOTER -->
+        <!-- 8. MULTI-COLUMN FOOTER -->
         <footer class="border-t border-white/5 py-16 px-6 bg-[#0f0e0e] text-xs text-gray-500 font-mono-technical">
             <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-5 gap-10">
                 
