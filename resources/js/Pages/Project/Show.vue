@@ -1,7 +1,7 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link, useForm, router } from '@inertiajs/vue3';
-import { ref, computed, watch, onUnmounted } from 'vue';
+import { ref, computed, watch, onUnmounted, onMounted } from 'vue';
 import axios from 'axios';
 
 const props = defineProps({
@@ -160,6 +160,14 @@ const uploadDraft = async () => {
             if (response.data.status === 'completed') {
                 chunkProgress.value = 100;
                 uploadStatus.value = 'success';
+                
+                // Fire native system desktop notification if permitted
+                if ('Notification' in window && Notification.permission === 'granted') {
+                    new Notification('RevisionRoom', {
+                        body: `Draft Version v${response.data.version || ''} uploaded and processed!`,
+                        silent: false
+                    });
+                }
                 return;
             }
         } catch (error) {
@@ -256,6 +264,12 @@ const deleteProject = () => {
         });
     }
 };
+
+onMounted(() => {
+    if ('Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission();
+    }
+});
 </script>
 
 <template>

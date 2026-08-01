@@ -140,31 +140,50 @@ class DraftController extends Controller
             $extension = pathinfo($filename, PATHINFO_EXTENSION);
             $newFilename = md5($filename . time()) . '.' . $extension;
             $diskName = config('filesystems.default') === 's3' ? 's3' : 'public';
-            
-            // Final destination path
             $finalPath = "drafts/{$newFilename}";
-            $tempMergedFile = storage_path("app/chunks/{$uploadId}_merged.tmp");
 
-            $out = fopen($tempMergedFile, "wb");
-            for ($i = 0; $i < $totalChunks; $i++) {
-                $chunkPath = "{$tempDir}/chunk_{$i}";
-                $in = fopen($chunkPath, "rb");
-                while ($buff = fread($in, 262144)) {
-                    fwrite($out, $buff);
+            if ($diskName === 'public' || $diskName === 'local') {
+                $finalPhysicalPath = Storage::disk($diskName)->path($finalPath);
+                
+                // Ensure directory exists
+                $finalDir = dirname($finalPhysicalPath);
+                if (!file_exists($finalDir)) {
+                    mkdir($finalDir, 0777, true);
                 }
-                fclose($in);
-                @unlink($chunkPath); // Delete chunk after merging
-            }
-            fclose($out);
-            
-            // Delete temp chunks folder
-            @rmdir($tempDir);
 
-            // Put merged file into the final disk store
-            $fileContent = fopen($tempMergedFile, 'r');
-            Storage::disk($diskName)->put($finalPath, $fileContent);
-            fclose($fileContent);
-            @unlink($tempMergedFile); // Clean up temp merged file
+                $out = fopen($finalPhysicalPath, "wb");
+                for ($i = 0; $i < $totalChunks; $i++) {
+                    $chunkPath = "{$tempDir}/chunk_{$i}";
+                    $in = fopen($chunkPath, "rb");
+                    while ($buff = fread($in, 262144)) {
+                        fwrite($out, $buff);
+                    }
+                    fclose($in);
+                    @unlink($chunkPath); // Delete chunk after merging
+                }
+                fclose($out);
+                @rmdir($tempDir);
+            } else {
+                // If using S3 or another cloud disk, merge to temp file then put to S3
+                $tempMergedFile = storage_path("app/chunks/{$uploadId}_merged.tmp");
+                $out = fopen($tempMergedFile, "wb");
+                for ($i = 0; $i < $totalChunks; $i++) {
+                    $chunkPath = "{$tempDir}/chunk_{$i}";
+                    $in = fopen($chunkPath, "rb");
+                    while ($buff = fread($in, 262144)) {
+                        fwrite($out, $buff);
+                    }
+                    fclose($in);
+                    @unlink($chunkPath);
+                }
+                fclose($out);
+                @rmdir($tempDir);
+
+                $fileContent = fopen($tempMergedFile, 'r');
+                Storage::disk($diskName)->put($finalPath, $fileContent);
+                fclose($fileContent);
+                @unlink($tempMergedFile);
+            }
 
             // Get next version number
             $nextVersion = $project->drafts()->max('version_number') + 1;
