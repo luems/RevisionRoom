@@ -117,8 +117,8 @@ class DraftController extends Controller
             'upload_id' => ['required', 'string', 'regex:/^[A-Za-z0-9_-]+$/'],
         ]);
 
-        $chunkIndex = $request->input('chunk_index');
-        $totalChunks = $request->input('total_chunks');
+        $chunkIndex = (int) $request->input('chunk_index');
+        $totalChunks = (int) $request->input('total_chunks');
         $filename = $request->input('filename');
         $uploadId = $request->input('upload_id');
 
