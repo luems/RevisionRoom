@@ -498,24 +498,31 @@ const showGuide = ref(false);
                     </div>
 
                     <!-- Mark current changes / Submit Revision Requests button -->
-                    <div v-if="activeDraft && project.status !== 'approved' && project.status !== 'archived'" class="mt-4 pt-3 border-t border-white/5 flex justify-between items-center gap-3">
-                        <span class="text-xs text-gray-400 font-mono-technical">
-                            {{ isSubmitted ? 'Status: Revision batch sent' : 'Ready for editor?' }}
-                        </span>
+                    <div v-if="activeDraft && project.status !== 'approved' && project.status !== 'archived'" class="mt-4 pt-3 border-t border-white/5 flex justify-between items-center gap-3 flex-wrap">
+                        <div class="flex items-center gap-2 text-xs font-mono-technical">
+                            <span v-if="isSubmitted" class="text-sky-400 flex items-center gap-1.5 font-medium">
+                                <span class="w-2 h-2 rounded-full bg-sky-400 animate-pulse"></span>
+                                Editor notified of requested changes
+                            </span>
+                            <span v-else class="text-gray-400">
+                                Finished leaving feedback?
+                            </span>
+                        </div>
+
                         <button 
                             type="button" 
                             @click="markCurrentChanges" 
-                            :class="`py-2 px-4 text-xs font-bold font-mono-technical uppercase tracking-wider rounded-sm transition-all shadow-md flex items-center gap-2 ${
+                            :class="`py-2 px-4 text-xs font-bold font-mono-technical uppercase tracking-wider rounded-sm transition-all shadow-md flex items-center gap-2 whitespace-nowrap ${
                                 isSubmitted 
-                                    ? 'bg-sky-500/20 text-sky-300 border border-sky-400/50 hover:bg-sky-500/30' 
+                                    ? 'bg-sky-500/10 text-sky-300 border border-sky-500/30 hover:bg-sky-500/20' 
                                     : 'bg-accent text-[#131313] hover:bg-[#d6ff1a] border border-accent/80'
                             }`"
                             :disabled="markingChanges"
                         >
-                            <svg v-if="isSubmitted" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-sky-400" viewBox="0 0 20 20" fill="currentColor">
+                            <svg v-if="isSubmitted" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-sky-400 shrink-0" viewBox="0 0 20 20" fill="currentColor">
                                 <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                             </svg>
-                            <span>{{ markingChanges ? 'Submitting...' : isSubmitted ? 'Revision Requests Submitted' : 'Submit Revision Requests' }}</span>
+                            <span>{{ markingChanges ? 'Submitting...' : isSubmitted ? 'Update & Re-send Batch' : 'Submit Revision Requests' }}</span>
                         </button>
                     </div>
                 </div>
