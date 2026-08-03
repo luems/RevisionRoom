@@ -16,6 +16,9 @@ class CommentController extends Controller
         $request->validate([
             'content' => 'required|string',
             'timestamp_seconds' => 'nullable|numeric',
+            'position_x' => 'nullable|numeric|between:0,100',
+            'position_y' => 'nullable|numeric|between:0,100',
+            'draft_item_id' => 'nullable|exists:draft_items,id',
             'image' => 'nullable|image|max:10240', // Max 10MB
         ]);
 
@@ -26,10 +29,13 @@ class CommentController extends Controller
 
         $comment = Comment::create([
             'draft_id' => $draft->id,
+            'draft_item_id' => $request->input('draft_item_id'),
             'user_id' => Auth::id(),
             'author_name' => Auth::user()?->name ?? $request->input('author_name', 'Client'),
             'content' => $request->content,
             'timestamp_seconds' => $request->timestamp_seconds,
+            'position_x' => $request->position_x,
+            'position_y' => $request->position_y,
             'is_resolved' => false,
             'image_path' => $imagePath,
         ]);

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Support\Facades\Storage;
 
-#[Fillable(['draft_id', 'user_id', 'author_name', 'content', 'timestamp_seconds', 'is_resolved', 'resolved_at', 'resolved_by', 'is_rejected', 'rejection_reason', 'image_path'])]
+#[Fillable(['draft_id', 'draft_item_id', 'user_id', 'author_name', 'content', 'timestamp_seconds', 'position_x', 'position_y', 'is_resolved', 'resolved_at', 'resolved_by', 'is_rejected', 'rejection_reason', 'image_path'])]
 class Comment extends Model
 {
     protected $casts = [
@@ -14,6 +14,8 @@ class Comment extends Model
         'is_rejected' => 'boolean',
         'resolved_at' => 'datetime',
         'timestamp_seconds' => 'float',
+        'position_x' => 'float',
+        'position_y' => 'float',
     ];
 
     protected $appends = ['image_url'];
@@ -30,6 +32,11 @@ class Comment extends Model
     public function draft()
     {
         return $this->belongsTo(Draft::class);
+    }
+
+    public function draftItem()
+    {
+        return $this->belongsTo(DraftItem::class);
     }
 
     public function user()

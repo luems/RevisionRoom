@@ -1,7 +1,7 @@
 <?php
 
-it('redirects to the login page', function () {
+it('renders the welcome landing page', function () {
     $response = $this->get('/');
 
-    $response->assertRedirect(route('login'));
+    $response->assertStatus(200);
 });

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Project;
 use App\Models\Draft;
+use App\Models\DraftItem;
 use App\Jobs\ProcessVideoDraft;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -15,6 +16,10 @@ class DraftController extends Controller
     public function store(Request $request, $projectId)
     {
         $project = Project::where('editor_id', Auth::id())->findOrFail($projectId);
+
+        if ($project->isPhoto()) {
+            return $this->storePhotoDraft($request, $project);
+        }
 
         $request->validate([
             'video' => 'required|file|mimes:mp4,mov,mkv,webm|max:2097152', // 2GB max
@@ -44,6 +49,202 @@ class DraftController extends Controller
         ProcessVideoDraft::dispatch($draft);
 
         return redirect()->back()->with('success', 'Draft uploaded and processing.');
+    }
+
+    protected function storePhotoDraft(Request $request, Project $project)
+    {
+        $request->validate([
+            'photos' => 'required_without:photo|array|min:1|max:20',
+            'photos.*' => 'file|image|mimes:jpeg,jpg,png,webp,avif|max:51200', // 50MB per photo
+            'photo' => 'nullable|file|image|mimes:jpeg,jpg,png,webp,avif|max:51200',
+        ]);
+
+        $files = $request->file('photos') ?? [$request->file('photo')];
+        $files = array_filter($files);
+
+        if (empty($files)) {
+            return redirect()->back()->withErrors(['photos' => 'At least one photo is required.']);
+        }
+
+        $diskName = config('filesystems.default') === 's3' ? 's3' : 'public';
+        $nextVersion = $project->drafts()->max('version_number') + 1;
+
+        $draft = Draft::create([
+            'project_id' => $project->id,
+            'version_number' => $nextVersion,
+            'video_path' => '',
+            'thumbnail_path' => null,
+            'duration' => null,
+            'original_filename' => $files[0]->getClientOriginalName(),
+            'status' => 'ready',
+        ]);
+
+        foreach ($files as $index => $file) {
+            $originalFilename = $file->getClientOriginalName();
+            $mimeType = $file->getMimeType() ?? $file->getClientMimeType();
+            $fileSize = $file->getSize();
+
+            // Verify image dimensions
+            $dimensions = @getimagesize($file->getRealPath());
+            $width = $dimensions ? $dimensions[0] : null;
+            $height = $dimensions ? $dimensions[1] : null;
+
+            // Generate unique filename
+            $extension = $file->getClientOriginalExtension() ?: 'jpg';
+            $randomName = (string) Str::uuid() . '.' . $extension;
+            $photoPath = "drafts/photos/{$randomName}";
+            $thumbPath = "drafts/photos/thumb_{$randomName}";
+
+            // Store original file
+            Storage::disk($diskName)->putFileAs('drafts/photos', $file, $randomName);
+
+            // Generate thumbnail & correct orientation if possible
+            $this->createPhotoThumbnail($file->getRealPath(), Storage::disk($diskName)->path($thumbPath), $mimeType);
+
+            $draftItem = DraftItem::create([
+                'draft_id' => $draft->id,
+                'file_path' => $photoPath,
+                'thumbnail_path' => $thumbPath,
+                'original_filename' => $originalFilename,
+                'mime_type' => $mimeType,
+                'file_size' => $fileSize,
+                'width' => $width,
+                'height' => $height,
+                'sort_order' => $index,
+            ]);
+
+            if ($index === 0) {
+                $draft->update([
+                    'thumbnail_path' => $thumbPath,
+                    'video_path' => $photoPath,
+                ]);
+            }
+        }
+
+        return redirect()->back()->with('success', 'Photo draft uploaded successfully.');
+    }
+
+    protected function createPhotoThumbnail(string $sourcePath, string $targetPath, string $mimeType)
+    {
+        try {
+            $targetDir = dirname($targetPath);
+            if (!file_exists($targetDir)) {
+                @mkdir($targetDir, 0777, true);
+            }
+
+            if (!function_exists('imagecreatefromstring')) {
+                @copy($sourcePath, $targetPath);
+                return;
+            }
+
+            $imgData = @file_get_contents($sourcePath);
+            if (!$imgData) {
+                @copy($sourcePath, $targetPath);
+                return;
+            }
+
+            $srcImg = @imagecreatefromstring($imgData);
+            if (!$srcImg) {
+                @copy($sourcePath, $targetPath);
+                return;
+            }
+
+            // Correct EXIF orientation for JPEG
+            if (function_exists('exif_read_data') && ($mimeType === 'image/jpeg' || $mimeType === 'image/jpg')) {
+                $exif = @exif_read_data($sourcePath);
+                if (!empty($exif['Orientation'])) {
+                    switch ($exif['Orientation']) {
+                        case 3:
+                            $srcImg = imagerotate($srcImg, 180, 0);
+                            break;
+                        case 6:
+                            $srcImg = imagerotate($srcImg, -90, 0);
+                            break;
+                        case 8:
+                            $srcImg = imagerotate($srcImg, 90, 0);
+                            break;
+                    }
+                }
+            }
+
+            $origW = imagesx($srcImg);
+            $origH = imagesy($srcImg);
+            $maxDim = 400;
+
+            if ($origW > $maxDim || $origH > $maxDim) {
+                if ($origW >= $origH) {
+                    $newW = $maxDim;
+                    $newH = (int) round(($origH / $origW) * $maxDim);
+                } else {
+                    $newH = $maxDim;
+                    $newW = (int) round(($origW / $origH) * $maxDim);
+                }
+            } else {
+                $newW = $origW;
+                $newH = $origH;
+            }
+
+            $thumbImg = imagecreatetruecolor($newW, $newH);
+
+            // Handle transparency for PNG/WebP
+            if ($mimeType === 'image/png' || $mimeType === 'image/webp') {
+                imagealphablending($thumbImg, false);
+                imagesavealpha($thumbImg, true);
+            }
+
+            imagecopyresampled($thumbImg, $srcImg, 0, 0, 0, 0, $newW, $newH, $origW, $origH);
+
+            if ($mimeType === 'image/png') {
+                imagepng($thumbImg, $targetPath, 7);
+            } elseif ($mimeType === 'image/webp' && function_exists('imagewebp')) {
+                imagewebp($thumbImg, $targetPath, 80);
+            } else {
+                imagejpeg($thumbImg, $targetPath, 85);
+            }
+
+            imagedestroy($srcImg);
+            imagedestroy($thumbImg);
+        } catch (\Throwable $e) {
+            @copy($sourcePath, $targetPath);
+        }
+    }
+
+    public function streamItem(Request $request, $draftItemId)
+    {
+        $draftItem = DraftItem::with('draft.project')->findOrFail($draftItemId);
+        $project = $draftItem->draft->project;
+
+        // Authorization: Editor owns project OR valid client share token
+        $isAuthorized = false;
+        if (Auth::check() && Auth::id() === $project->editor_id) {
+            $isAuthorized = true;
+        } elseif ($request->has('share_token') && $request->input('share_token') === $project->share_token) {
+            $isAuthorized = true;
+        } elseif (session("client_authenticated_{$project->share_token}")) {
+            $isAuthorized = true;
+        }
+
+        if (!$isAuthorized) {
+            abort(403, 'Unauthorized access to media.');
+        }
+
+        $type = $request->input('type') === 'thumbnail' ? 'thumbnail' : 'file';
+        $pathKey = $type === 'thumbnail' ? ($draftItem->thumbnail_path ?? $draftItem->file_path) : $draftItem->file_path;
+
+        $diskName = config('filesystems.default') === 's3' ? 's3' : 'public';
+        if ($diskName === 's3') {
+            return redirect(Storage::disk('s3')->url($pathKey));
+        }
+
+        $fullPath = Storage::disk('public')->path($pathKey);
+        if (!file_exists($fullPath)) {
+            abort(404, 'Media file not found.');
+        }
+
+        return response()->file($fullPath, [
+            'Content-Type' => $draftItem->mime_type ?? 'image/jpeg',
+            'Cache-Control' => 'public, max-age=86400',
+        ]);
     }
 
     public function stream($id)
@@ -126,14 +327,11 @@ class DraftController extends Controller
 
         $chunkFile = $request->file('file');
         
-        // Define directory to store temporary chunks
         $tempDir = storage_path("app/chunks/{$uploadId}");
         if (!file_exists($tempDir)) {
             mkdir($tempDir, 0777, true);
         }
 
-        // The browser sends chunks sequentially. Append each chunk immediately so
-        // the final request does not have to copy the entire video again at 99%.
         $assemblyPath = "{$tempDir}/video.part";
         $nextChunkPath = "{$tempDir}/next_chunk";
         $nextChunk = file_exists($nextChunkPath) ? (int) file_get_contents($nextChunkPath) : 0;
@@ -169,14 +367,11 @@ class DraftController extends Controller
             if ($diskName === 'public') {
                 $finalPhysicalPath = Storage::disk($diskName)->path($finalPath);
                 
-                // Ensure directory exists
                 $finalDir = dirname($finalPhysicalPath);
                 if (!file_exists($finalDir)) {
                     mkdir($finalDir, 0777, true);
                 }
 
-                // Same filesystem: rename is atomic and effectively instant,
-                // regardless of the completed video's size.
                 if (!rename($assemblyPath, $finalPhysicalPath)) {
                     throw new \RuntimeException('Unable to finalize the uploaded video.');
                 }
@@ -190,7 +385,6 @@ class DraftController extends Controller
             @unlink($nextChunkPath);
             @rmdir($tempDir);
 
-            // Get next version number
             $nextVersion = $project->drafts()->max('version_number') + 1;
 
             $draft = Draft::create([
@@ -203,7 +397,6 @@ class DraftController extends Controller
                 'status' => 'processing',
             ]);
 
-            // Dispatch background processing job
             ProcessVideoDraft::dispatch($draft);
 
             return response()->json([

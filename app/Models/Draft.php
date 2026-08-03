@@ -16,6 +16,11 @@ class Draft extends Model
         return $this->belongsTo(Project::class);
     }
 
+    public function items()
+    {
+        return $this->hasMany(DraftItem::class)->orderBy('sort_order', 'asc');
+    }
+
     public function comments()
     {
         return $this->hasMany(Comment::class)->orderBy('timestamp_seconds', 'asc')->orderBy('created_at', 'asc');
@@ -26,11 +31,20 @@ class Draft extends Model
         return $this->hasMany(Approval::class);
     }
 
+    public function isPhoto(): bool
+    {
+        return $this->project ? $this->project->isPhoto() : false;
+    }
+
+    public function isVideo(): bool
+    {
+        return $this->project ? $this->project->isVideo() : true;
+    }
+
     public function getVideoUrlAttribute(): ?string
     {
         if (!$this->video_path) return null;
 
-        // Handle S3/MinIO vs local storage
         if (config('filesystems.default') === 's3') {
             return Storage::disk('s3')->url($this->video_path);
         }
@@ -39,11 +53,15 @@ class Draft extends Model
 
     public function getThumbnailUrlAttribute(): ?string
     {
-        if (!$this->thumbnail_path) return null;
-
-        if (config('filesystems.default') === 's3') {
-            return Storage::disk('s3')->url($this->thumbnail_path);
+        if ($this->thumbnail_path) {
+            if (config('filesystems.default') === 's3') {
+                return Storage::disk('s3')->url($this->thumbnail_path);
+            }
+            return Storage::url($this->thumbnail_path);
         }
-        return Storage::url($this->thumbnail_path);
+
+        // Fallback to first photo item thumbnail if photo project
+        $firstItem = $this->items->first();
+        return $firstItem ? $firstItem->thumbnail_url : null;
     }
 }

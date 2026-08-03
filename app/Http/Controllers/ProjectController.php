@@ -14,7 +14,7 @@ class ProjectController extends Controller
     public function index()
     {
         $projects = Project::where('editor_id', Auth::id())
-            ->with(['client', 'latestDraft'])
+            ->with(['client', 'latestDraft.items'])
             ->withCount('drafts')
             ->orderBy('updated_at', 'desc')
             ->get();
@@ -29,6 +29,7 @@ class ProjectController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'media_type' => 'nullable|string|in:video,photo',
             'client_name' => 'required|string|max:255',
             'client_email' => 'required|email|max:255',
         ]);
@@ -47,6 +48,7 @@ class ProjectController extends Controller
         $project = Project::create([
             'name' => $request->name,
             'description' => $request->description,
+            'media_type' => $request->input('media_type', 'video'),
             'editor_id' => Auth::id(),
             'client_id' => $client->id,
             'share_token' => Str::random(32),
@@ -62,7 +64,7 @@ class ProjectController extends Controller
         $project = Project::where('editor_id', Auth::id())
             ->with(['client', 'drafts' => function ($q) {
                 $q->orderBy('version_number', 'desc');
-            }, 'drafts.comments.user'])
+            }, 'drafts.items', 'drafts.comments.user', 'drafts.comments.draftItem'])
             ->findOrFail($id);
 
         return Inertia::render('Project/Show', [
@@ -75,7 +77,7 @@ class ProjectController extends Controller
         $project = Project::where('editor_id', Auth::id())
             ->with(['drafts' => function ($q) {
                 $q->orderBy('version_number', 'desc');
-            }])
+            }, 'drafts.items'])
             ->findOrFail($id);
 
         $draft1Id = $request->query('draft1');
@@ -91,14 +93,14 @@ class ProjectController extends Controller
         $draft2 = $project->drafts->firstWhere('id', $draft2Id);
 
         if ($draft1) {
-            $draft1->load(['comments' => function($q) {
-                $q->orderBy('timestamp_seconds', 'asc');
-            }, 'comments.user']);
+            $draft1->load(['items', 'comments' => function($q) {
+                $q->orderBy('timestamp_seconds', 'asc')->orderBy('created_at', 'asc');
+            }, 'comments.user', 'comments.draftItem']);
         }
         if ($draft2) {
-            $draft2->load(['comments' => function($q) {
-                $q->orderBy('timestamp_seconds', 'asc');
-            }, 'comments.user']);
+            $draft2->load(['items', 'comments' => function($q) {
+                $q->orderBy('timestamp_seconds', 'asc')->orderBy('created_at', 'asc');
+            }, 'comments.user', 'comments.draftItem']);
         }
 
         return Inertia::render('Project/Compare', [

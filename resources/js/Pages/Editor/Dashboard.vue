@@ -1,33 +1,36 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 
 const props = defineProps({
     projects: Array,
 });
 
 const showCreateModal = ref(false);
+const activeFilter = ref('all'); // 'all' | 'video' | 'photo' | 'active' | 'approved' | 'archived'
 
 const form = useForm({
     name: '',
     description: '',
+    media_type: 'video',
     client_name: '',
     client_email: '',
 });
 
+const filteredProjects = computed(() => {
+    if (!props.projects) return [];
+    if (activeFilter.value === 'all') return props.projects;
+    if (activeFilter.value === 'video') return props.projects.filter(p => (p.media_type || 'video') === 'video');
+    if (activeFilter.value === 'photo') return props.projects.filter(p => p.media_type === 'photo');
+    return props.projects.filter(p => p.status === activeFilter.value);
+});
+
 const submit = () => {
     form.post(route('projects.store'), {
-        onStart: () => {
-            console.log('[Dashboard] Creating new project...', form.data());
-        },
         onSuccess: () => {
-            console.log('[Dashboard] Project created successfully!');
             showCreateModal.value = false;
             form.reset();
-        },
-        onError: (errors) => {
-            console.error('[Dashboard] Project creation failed with errors:', errors);
         },
     });
 };
@@ -38,34 +41,49 @@ const submit = () => {
 
     <AuthenticatedLayout>
         <template #header>
-            <div class="flex justify-between items-center border-b border-white/5 pb-6">
-                <h2 class="text-3xl font-editorial tracking-tight text-gray-100">
-                    Active Studio Projects
-                </h2>
-                <button @click="showCreateModal = true" class="btn-primary flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
-                    </svg>
-                    New Project
-                </button>
+            <div class="flex justify-between items-center border-b border-white/5 pb-6 flex-wrap gap-4">
+                <div>
+                    <h2 class="text-3xl font-editorial tracking-tight text-gray-100">
+                        Active Studio Projects
+                    </h2>
+                    <p class="text-xs text-gray-400 font-mono-technical mt-1">Manage video & photo client reviews, drafts, and approvals.</p>
+                </div>
+                
+                <div class="flex items-center gap-3">
+                    <!-- Filter Tabs -->
+                    <div class="flex items-center gap-1 bg-[#1c1b1b] p-1 rounded-lg border border-white/10 text-xs font-mono-technical">
+                        <button @click="activeFilter = 'all'" :class="`px-2.5 py-1 rounded font-bold ${activeFilter === 'all' ? 'bg-accent text-[#131313]' : 'text-gray-400 hover:text-gray-200'}`">All</button>
+                        <button @click="activeFilter = 'video'" :class="`px-2.5 py-1 rounded font-bold ${activeFilter === 'video' ? 'bg-accent text-[#131313]' : 'text-gray-400 hover:text-gray-200'}`">🎬 Video</button>
+                        <button @click="activeFilter = 'photo'" :class="`px-2.5 py-1 rounded font-bold ${activeFilter === 'photo' ? 'bg-accent text-[#131313]' : 'text-gray-400 hover:text-gray-200'}`">🖼️ Photo</button>
+                        <button @click="activeFilter = 'active'" :class="`px-2.5 py-1 rounded font-bold ${activeFilter === 'active' ? 'bg-accent text-[#131313]' : 'text-gray-400 hover:text-gray-200'}`">Active</button>
+                        <button @click="activeFilter = 'approved'" :class="`px-2.5 py-1 rounded font-bold ${activeFilter === 'approved' ? 'bg-accent text-[#131313]' : 'text-gray-400 hover:text-gray-200'}`">Approved</button>
+                    </div>
+
+                    <button @click="showCreateModal = true" class="btn-primary flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+                        </svg>
+                        New Project
+                    </button>
+                </div>
             </div>
         </template>
 
         <div class="py-12 bg-[#131313]">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <!-- Empty State -->
-                <div v-if="projects.length === 0" class="glass-card p-12 text-center flex flex-col items-center justify-center min-h-[300px]">
+                <div v-if="filteredProjects.length === 0" class="glass-card p-12 text-center flex flex-col items-center justify-center min-h-[300px]">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-500 mb-4 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                     </svg>
-                    <h3 class="text-lg font-editorial font-bold mb-2">No projects created yet</h3>
-                    <p class="text-gray-400 mb-6 max-w-sm text-sm">Create your first creative project and invite your client to share draft versions and collect timestamped feedback.</p>
+                    <h3 class="text-lg font-editorial font-bold mb-2">No projects found</h3>
+                    <p class="text-gray-400 mb-6 max-w-sm text-sm">Create your first video or photo project to start collecting client feedback.</p>
                     <button @click="showCreateModal = true" class="btn-primary">Create a Project</button>
                 </div>
 
                 <!-- Projects Grid -->
                 <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div v-for="project in projects" :key="project.id" class="glass-card hover:border-accent/40 transition-all duration-300 flex flex-col justify-between overflow-hidden group">
+                    <div v-for="project in filteredProjects" :key="project.id" class="glass-card hover:border-accent/40 transition-all duration-300 flex flex-col justify-between overflow-hidden group">
                         <!-- Thumbnail Header / Background -->
                         <div class="h-44 bg-slate-900/60 relative flex items-center justify-center border-b border-white/5 overflow-hidden">
                             <img v-if="project.latest_draft && project.latest_draft.thumbnail_url" 
@@ -73,12 +91,19 @@ const submit = () => {
                                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
                                  alt="Project cover" />
                             <div v-else class="text-gray-600 flex flex-col items-center gap-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                </svg>
+                                <span class="text-2xl">{{ project.media_type === 'photo' ? '🖼️' : '🎬' }}</span>
                                 <span class="text-[10px] uppercase tracking-wider font-semibold opacity-50 font-mono-technical">No Drafts Uploaded</span>
                             </div>
-                            <div class="absolute top-3 right-3">
+
+                            <!-- Media Type Pill -->
+                            <div class="absolute top-3 left-3 z-10">
+                                <span class="bg-[#131313]/90 border border-white/10 px-2 py-0.5 rounded text-[10px] font-mono-technical font-bold uppercase tracking-wider text-accent flex items-center gap-1">
+                                    <span>{{ project.media_type === 'photo' ? '🖼️ PHOTO' : '🎬 VIDEO' }}</span>
+                                </span>
+                            </div>
+
+                            <!-- Status Pill -->
+                            <div class="absolute top-3 right-3 z-10">
                                 <span class="bg-[#131313]/90 border border-white/5 px-2.5 py-1 rounded-sm text-[10px] font-mono-technical font-semibold uppercase tracking-wider flex items-center gap-1.5 text-gray-200">
                                     <span :class="`w-1.5 h-1.5 rounded-full ${
                                         project.status === 'approved' ? 'bg-[#10b981]' : project.status === 'archived' ? 'bg-[#6366f1]' : 'bg-[#f59e0b]'
@@ -89,24 +114,24 @@ const submit = () => {
                         </div>
 
                         <!-- Card Body -->
-                        <div class="p-6 flex-1 flex flex-col justify-between">
+                        <div class="p-6 flex-1 flex flex-col justify-between space-y-4">
                             <div>
                                 <h4 class="text-xl font-editorial font-bold text-gray-100 mb-2 truncate group-hover:text-accent transition-colors">
                                     {{ project.name }}
                                 </h4>
-                                <p class="text-gray-400 text-sm line-clamp-2 mb-4 leading-relaxed">
+                                <p class="text-gray-400 text-sm line-clamp-2 leading-relaxed">
                                     {{ project.description || 'No description provided.' }}
                                 </p>
                             </div>
 
-                            <div class="border-t border-white/5 pt-4 mt-2 flex flex-col gap-2 text-xs text-gray-400">
+                            <div class="border-t border-white/5 pt-4 flex flex-col gap-2 text-xs text-gray-400 font-mono-technical">
                                 <div class="flex justify-between">
                                     <span>Client:</span>
                                     <span class="font-medium text-gray-200">{{ project.client?.name || 'N/A' }}</span>
                                 </div>
                                 <div class="flex justify-between">
-                                    <span>Drafts:</span>
-                                    <span class="font-medium text-gray-200">{{ project.drafts_count }}</span>
+                                    <span>Draft Versions:</span>
+                                    <span class="font-medium text-accent font-bold">{{ project.drafts_count }}</span>
                                 </div>
                             </div>
                         </div>
@@ -127,16 +152,46 @@ const submit = () => {
 
         <!-- Create Project Modal -->
         <div v-if="showCreateModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-            <div class="glass-card max-w-md w-full p-8 relative animate-fade-in">
+            <div class="glass-card max-w-lg w-full p-8 relative animate-fade-in">
                 <button @click="showCreateModal = false" class="absolute top-4 right-4 text-gray-400 hover:text-gray-200">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
 
-                <h3 class="text-2xl font-editorial font-bold mb-6 text-gray-100">Create New Project</h3>
+                <h3 class="text-2xl font-editorial font-bold mb-6 text-gray-100">Create New Studio Project</h3>
 
                 <form @submit.prevent="submit" class="space-y-4">
+                    <!-- Project Media Type Selection -->
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">Project Media Type</label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <label :class="`p-3.5 rounded-xl border cursor-pointer transition-all flex flex-col justify-between space-y-2 ${
+                                form.media_type === 'video' ? 'bg-accent/10 border-accent text-white' : 'bg-slate-950 border-white/10 text-gray-400 hover:border-white/20'
+                            }`">
+                                <input type="radio" v-model="form.media_type" value="video" class="sr-only" />
+                                <div class="flex items-center gap-2 font-bold text-sm font-editorial text-gray-100">
+                                    <span>🎬 Video Review</span>
+                                </div>
+                                <p class="text-[11px] leading-tight text-gray-400 font-sans">
+                                    Review motion projects using timestamped feedback and synchronized video comparisons.
+                                </p>
+                            </label>
+
+                            <label :class="`p-3.5 rounded-xl border cursor-pointer transition-all flex flex-col justify-between space-y-2 ${
+                                form.media_type === 'photo' ? 'bg-accent/10 border-accent text-white' : 'bg-slate-950 border-white/10 text-gray-400 hover:border-white/20'
+                            }`">
+                                <input type="radio" v-model="form.media_type" value="photo" class="sr-only" />
+                                <div class="flex items-center gap-2 font-bold text-sm font-editorial text-gray-100">
+                                    <span>🖼️ Photo Review</span>
+                                </div>
+                                <p class="text-[11px] leading-tight text-gray-400 font-sans">
+                                    Review photography and visual designs using pinned comments, zoomable previews, and image comparisons.
+                                </p>
+                            </label>
+                        </div>
+                    </div>
+
                     <div>
                         <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">Project Name</label>
                         <input type="text" v-model="form.name" class="w-full bg-slate-950 border border-white/10 rounded-sm px-4 py-2.5 text-sm text-white focus:outline-none focus:border-accent" required />
@@ -144,7 +199,7 @@ const submit = () => {
 
                     <div>
                         <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">Description (Optional)</label>
-                        <textarea v-model="form.description" rows="3" class="w-full bg-slate-950 border border-white/10 rounded-sm px-4 py-2.5 text-sm text-white focus:outline-none focus:border-accent"></textarea>
+                        <textarea v-model="form.description" rows="2" class="w-full bg-slate-950 border border-white/10 rounded-sm px-4 py-2.5 text-sm text-white focus:outline-none focus:border-accent"></textarea>
                     </div>
 
                     <div class="border-t border-white/5 pt-4">

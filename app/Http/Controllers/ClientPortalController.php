@@ -21,6 +21,8 @@ class ClientPortalController extends Controller
             Auth::login($project->client);
         }
 
+        session(["client_authenticated_{$share_token}" => true]);
+
         return redirect()->route('client.projects.show', $project->share_token);
     }
 
@@ -32,8 +34,10 @@ class ClientPortalController extends Controller
         $project = Project::where('share_token', $share_token)
             ->with(['editor', 'drafts' => function ($q) {
                 $q->orderBy('version_number', 'desc');
-            }, 'drafts.comments.user'])
+            }, 'drafts.items', 'drafts.comments.user', 'drafts.comments.draftItem'])
             ->firstOrFail();
+
+        session(["client_authenticated_{$share_token}" => true]);
 
         // Auto-login the associated client if not logged in
         if ($project->client_id && (!Auth::check() || (Auth::user()->role === 'client' && Auth::id() !== $project->client_id))) {
@@ -74,8 +78,10 @@ class ClientPortalController extends Controller
         $project = Project::where('share_token', $share_token)
             ->with(['drafts' => function ($q) {
                 $q->orderBy('version_number', 'desc');
-            }])
+            }, 'drafts.items'])
             ->firstOrFail();
+
+        session(["client_authenticated_{$share_token}" => true]);
 
         // Auto-login the associated client if not logged in
         if ($project->client_id && (!Auth::check() || (Auth::user()->role === 'client' && Auth::id() !== $project->client_id))) {
@@ -95,14 +101,14 @@ class ClientPortalController extends Controller
         $draft2 = $project->drafts->firstWhere('id', $draft2Id);
 
         if ($draft1) {
-            $draft1->load(['comments' => function($q) {
-                $q->orderBy('timestamp_seconds', 'asc');
-            }, 'comments.user']);
+            $draft1->load(['items', 'comments' => function($q) {
+                $q->orderBy('timestamp_seconds', 'asc')->orderBy('created_at', 'asc');
+            }, 'comments.user', 'comments.draftItem']);
         }
         if ($draft2) {
-            $draft2->load(['comments' => function($q) {
-                $q->orderBy('timestamp_seconds', 'asc');
-            }, 'comments.user']);
+            $draft2->load(['items', 'comments' => function($q) {
+                $q->orderBy('timestamp_seconds', 'asc')->orderBy('created_at', 'asc');
+            }, 'comments.user', 'comments.draftItem']);
         }
 
         return Inertia::render('Project/Compare', [

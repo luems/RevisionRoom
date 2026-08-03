@@ -48,14 +48,14 @@ class ApprovalController extends Controller
 
         // Fallback to latest draft if not approved
         $draft = $approval
-            ? $approval->draft
-            : $project->drafts()->first();
+            ? $approval->draft()->with('items')->first()
+            : $project->drafts()->with('items')->first();
 
         if (!$draft) {
             return redirect()->back()->with('error', 'No drafts found for this project.');
         }
 
-        $comments = $draft->comments()->with('user')->get();
+        $comments = $draft->comments()->with(['user', 'draftItem'])->get();
 
         $pdf = Pdf::loadView('pdf.approval_record', [
             'project' => $project,

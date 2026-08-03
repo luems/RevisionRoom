@@ -126,3 +126,15 @@ body {
   transform: translateY(-50%) scale(1.4);
   background-color: #ffffff;
 }
+
+/* =========================================
+   Accent utility classes — always available
+   (not purged, safe for dynamic bindings)
+   ========================================= */
+.bg-accent          { background-color: var(--accent) !important; }
+.bg-accent-hover    { background-color: var(--accent-hover) !important; }
+.text-accent        { color: var(--accent) !important; }
+.border-accent      { border-color: var(--accent) !important; }
+.ring-accent        { --tw-ring-color: var(--accent); }
+.hover\:text-accent:hover { color: var(--accent) !important; }
+.hover\:bg-accent:hover   { background-color: var(--accent) !important; }

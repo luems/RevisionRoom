@@ -52,5 +52,6 @@ Route::delete('projects/{project}/cancel-approval', [ApprovalController::class, 
 Route::post('projects/{project}/mark-changes', [ClientPortalController::class, 'markChangesRequested'])->name('projects.mark-changes');
 Route::get('projects/{project}/download-record', [ApprovalController::class, 'downloadRecord'])->name('projects.download-record');
 Route::get('drafts/{draft}/stream', [DraftController::class, 'stream'])->name('drafts.stream');
+Route::get('draft-items/{draftItem}/media', [DraftController::class, 'streamItem'])->name('draft_items.media');
 
 require __DIR__.'/auth.php';
