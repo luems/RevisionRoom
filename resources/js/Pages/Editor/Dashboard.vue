@@ -53,8 +53,12 @@ const submit = () => {
                     <!-- Filter Tabs -->
                     <div class="flex items-center gap-1 bg-[#1c1b1b] p-1 rounded-lg border border-white/10 text-xs font-mono-technical">
                         <button @click="activeFilter = 'all'" :class="`px-2.5 py-1 rounded font-bold ${activeFilter === 'all' ? 'bg-accent text-[#131313]' : 'text-gray-400 hover:text-gray-200'}`">All</button>
-                        <button @click="activeFilter = 'video'" :class="`px-2.5 py-1 rounded font-bold ${activeFilter === 'video' ? 'bg-accent text-[#131313]' : 'text-gray-400 hover:text-gray-200'}`">🎬 Video</button>
-                        <button @click="activeFilter = 'photo'" :class="`px-2.5 py-1 rounded font-bold ${activeFilter === 'photo' ? 'bg-accent text-[#131313]' : 'text-gray-400 hover:text-gray-200'}`">🖼️ Photo</button>
+                        <button @click="activeFilter = 'video'" :class="`px-2.5 py-1 rounded font-bold flex items-center gap-1 ${activeFilter === 'video' ? 'bg-accent text-[#131313]' : 'text-gray-400 hover:text-gray-200'}`">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg> Video
+                        </button>
+                        <button @click="activeFilter = 'photo'" :class="`px-2.5 py-1 rounded font-bold flex items-center gap-1 ${activeFilter === 'photo' ? 'bg-accent text-[#131313]' : 'text-gray-400 hover:text-gray-200'}`">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg> Photo
+                        </button>
                         <button @click="activeFilter = 'active'" :class="`px-2.5 py-1 rounded font-bold ${activeFilter === 'active' ? 'bg-accent text-[#131313]' : 'text-gray-400 hover:text-gray-200'}`">Active</button>
                         <button @click="activeFilter = 'approved'" :class="`px-2.5 py-1 rounded font-bold ${activeFilter === 'approved' ? 'bg-accent text-[#131313]' : 'text-gray-400 hover:text-gray-200'}`">Approved</button>
                     </div>
@@ -91,14 +95,17 @@ const submit = () => {
                                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
                                  alt="Project cover" />
                             <div v-else class="text-gray-600 flex flex-col items-center gap-2">
-                                <span class="text-2xl">{{ project.media_type === 'photo' ? '🖼️' : '🎬' }}</span>
+                                <svg v-if="project.media_type === 'photo'" xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 opacity-30" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
                                 <span class="text-[10px] uppercase tracking-wider font-semibold opacity-50 font-mono-technical">No Drafts Uploaded</span>
                             </div>
 
                             <!-- Media Type Pill -->
                             <div class="absolute top-3 left-3 z-10">
                                 <span class="bg-[#131313]/90 border border-white/10 px-2 py-0.5 rounded text-[10px] font-mono-technical font-bold uppercase tracking-wider text-accent flex items-center gap-1">
-                                    <span>{{ project.media_type === 'photo' ? '🖼️ PHOTO' : '🎬 VIDEO' }}</span>
+                                    <svg v-if="project.media_type === 'photo'" xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                    <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                                    <span>{{ project.media_type === 'photo' ? 'PHOTO' : 'VIDEO' }}</span>
                                 </span>
                             </div>
 
@@ -171,7 +178,8 @@ const submit = () => {
                             }`">
                                 <input type="radio" v-model="form.media_type" value="video" class="sr-only" />
                                 <div class="flex items-center gap-2 font-bold text-sm font-editorial text-gray-100">
-                                    <span>🎬 Video Review</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-accent shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                                    <span>Video Review</span>
                                 </div>
                                 <p class="text-[11px] leading-tight text-gray-400 font-sans">
                                     Review motion projects using timestamped feedback and synchronized video comparisons.
@@ -183,7 +191,8 @@ const submit = () => {
                             }`">
                                 <input type="radio" v-model="form.media_type" value="photo" class="sr-only" />
                                 <div class="flex items-center gap-2 font-bold text-sm font-editorial text-gray-100">
-                                    <span>🖼️ Photo Review</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-accent shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                    <span>Photo Review</span>
                                 </div>
                                 <p class="text-[11px] leading-tight text-gray-400 font-sans">
                                     Review photography and visual designs using pinned comments, zoomable previews, and image comparisons.

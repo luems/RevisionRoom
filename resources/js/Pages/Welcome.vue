@@ -136,14 +136,17 @@ const activeFeature = ref('sync');
                 <!-- Right Graphic Box: Mock Interactive Canvas -->
                 <div class="glass-card p-6 bg-[#1a1a1a] border border-white/10 rounded-2xl relative overflow-hidden shadow-xl space-y-4">
                     <div class="flex justify-between items-center bg-[#131313] p-2.5 rounded-xl border border-white/5 text-xs font-mono-technical">
-                        <span class="text-accent font-bold">📍 Add Pin Mode Active</span>
+                        <span class="text-accent font-bold flex items-center gap-1.5">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                            Add Pin Mode Active
+                        </span>
                         <span class="text-gray-400">Zoom: 150%</span>
                     </div>
 
                     <!-- Mock Canvas Box -->
                     <div class="bg-black aspect-video rounded-xl border border-white/10 relative flex items-center justify-center overflow-hidden">
                         <div class="absolute inset-0 bg-gradient-to-br from-indigo-950/60 via-slate-900 to-black flex items-center justify-center">
-                            <span class="text-5xl opacity-40">🖼️</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 opacity-20 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                         </div>
                         
                         <!-- Mock Pins -->
@@ -237,8 +240,8 @@ const activeFeature = ref('sync');
                 <!-- Bento Card 1: Video & Photo Support -->
                 <div class="glass-card p-6 bg-[#1a1a1a] border border-white/5 hover:border-accent/40 transition-all duration-300 space-y-4 flex flex-col justify-between">
                     <div class="space-y-3">
-                        <div class="w-10 h-10 rounded-lg bg-accent/10 border border-accent/20 flex items-center justify-center text-accent font-bold text-xl">
-                            🎬
+                        <div class="w-10 h-10 rounded-lg bg-accent/10 border border-accent/20 flex items-center justify-center text-accent">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
                         </div>
                         <h3 class="text-xl font-editorial font-bold text-gray-200">Video & Photo Projects</h3>
                         <p class="text-xs text-gray-400 leading-relaxed">Choose between Video and Photo projects. Review motion with timestamped comments or photography sets with interactive pinned annotations.</p>
@@ -251,8 +254,8 @@ const activeFeature = ref('sync');
                 <!-- Bento Card 2: Passwordless Magic Links -->
                 <div class="glass-card p-6 bg-[#1a1a1a] border border-white/5 hover:border-emerald-500/40 transition-all duration-300 space-y-4 flex flex-col justify-between">
                     <div class="space-y-3">
-                        <div class="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold text-xl">
-                            🔗
+                        <div class="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
                         </div>
                         <h3 class="text-xl font-editorial font-bold text-gray-200">Passwordless Magic Links</h3>
                         <p class="text-xs text-gray-400 leading-relaxed">Share one secure tokenized link with clients. They review, comment, and sign off instantly on any desktop or mobile browser without signing up.</p>
@@ -265,8 +268,8 @@ const activeFeature = ref('sync');
                 <!-- Bento Card 3: Verifiable PDF Certificates -->
                 <div class="glass-card p-6 bg-[#1a1a1a] border border-white/5 hover:border-sky-500/40 transition-all duration-300 space-y-4 flex flex-col justify-between">
                     <div class="space-y-3">
-                        <div class="w-10 h-10 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400 font-bold text-xl">
-                            📄
+                        <div class="w-10 h-10 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                         </div>
                         <h3 class="text-xl font-editorial font-bold text-gray-200">PDF Sign-Off Audit Trails</h3>
                         <p class="text-xs text-gray-400 leading-relaxed">Once client approves a project, lock revisions and generate a watermarked PDF audit certificate containing approver details, timestamp, and signature log.</p>

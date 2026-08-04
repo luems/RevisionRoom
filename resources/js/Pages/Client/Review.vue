@@ -275,7 +275,8 @@ const showGuide = ref(false);
                     <h1 class="text-2xl font-editorial font-bold text-accent tracking-tight">RevisionRoom</h1>
                     <div class="h-4 w-[1px] bg-white/10 hidden md:block"></div>
                     <div class="flex items-center gap-2">
-                        <span class="text-lg">{{ isPhotoProject ? '🖼️' : '🎬' }}</span>
+                        <svg v-if="isPhotoProject" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
                         <span class="text-xs font-mono-technical uppercase tracking-wider text-gray-400 font-bold hidden md:block">{{ project.name }}</span>
                     </div>
                 </div>
@@ -339,7 +340,7 @@ const showGuide = ref(false);
                         </div>
 
                         <div v-else class="bg-[#1c1b1b] aspect-video flex flex-col items-center justify-center p-8 text-gray-500 rounded-none">
-                            <span class="text-4xl mb-3 opacity-30">🖼️</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mb-3 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                             <h4 class="font-editorial text-lg font-bold text-gray-300">No photo draft uploaded yet</h4>
                         </div>
                     </template>
@@ -384,15 +385,19 @@ const showGuide = ref(false);
                 <!-- Comment Input Area -->
                 <div v-if="activeDraft && project.status !== 'approved' && project.status !== 'archived'" class="glass-card p-6 space-y-4">
                     <div class="flex justify-between items-center">
-                        <h3 class="font-bold text-sm uppercase tracking-wider font-mono-technical text-gray-300">
-                            {{ pendingPin ? '📍 Adding Pinned Comment' : 'Add Feedback' }}
+                        <h3 class="font-bold text-sm uppercase tracking-wider font-mono-technical text-gray-300 flex items-center gap-2">
+                            <svg v-if="pendingPin" xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-accent shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                            {{ pendingPin ? 'Adding Pinned Comment' : 'Add Feedback' }}
                         </h3>
                         <button @click="showGuide = !showGuide" type="button" class="text-gray-400 hover:text-accent p-1 border border-white/10 rounded-full h-7 w-7 flex items-center justify-center font-bold text-xs">?</button>
                     </div>
 
                     <!-- Pending Pin Tag Banner -->
                     <div v-if="pendingPin" class="p-3 bg-accent/10 border border-accent/30 rounded-xl text-xs text-accent flex justify-between items-center font-mono-technical">
-                        <span>📍 Pin placed at coordinates: ({{ pendingPin.x }}%, {{ pendingPin.y }}%)</span>
+                        <span class="flex items-center gap-1.5">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                            Pin placed at coordinates: ({{ pendingPin.x }}%, {{ pendingPin.y }}%)
+                        </span>
                         <button type="button" @click="cancelPin" class="text-rose-400 hover:text-rose-300 font-bold underline">Cancel Pin</button>
                     </div>
 
@@ -442,7 +447,8 @@ const showGuide = ref(false);
                     <div class="flex items-center justify-between flex-wrap gap-4">
                         <div>
                             <h3 class="font-bold text-sm uppercase tracking-wider font-mono-technical text-gray-200 flex items-center gap-2">
-                                🔄 Version Comparison
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+                                Version Comparison
                             </h3>
                             <p class="text-xs text-gray-400 mt-1 font-mono-technical">Compare draft versions side-by-side.</p>
                         </div>
@@ -525,12 +531,18 @@ const showGuide = ref(false);
                                 </div>
 
                                 <div class="shrink-0 font-semibold text-xs flex items-center gap-2">
-                                    <span v-if="comment.is_resolved" class="text-emerald-400 font-bold">✓ Resolved</span>
-                                    <span v-else-if="comment.is_rejected" class="text-rose-400 font-bold">🚫 Declined</span>
+                                    <span v-if="comment.is_resolved" class="text-emerald-400 font-bold flex items-center gap-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                        Resolved
+                                    </span>
+                                    <span v-else-if="comment.is_rejected" class="text-rose-400 font-bold flex items-center gap-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                                        Declined
+                                    </span>
                                     <span v-else class="text-amber-500 font-bold">○ Open</span>
 
                                     <button @click.stop="deleteComment(comment.id)" title="Delete" class="text-gray-500 hover:text-rose-400 p-1">
-                                        🗑️
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
                                     </button>
                                 </div>
                             </div>

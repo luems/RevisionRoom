@@ -289,7 +289,8 @@ onMounted(() => {
             <div class="flex justify-between items-center flex-wrap gap-4 border-b border-white/5 pb-6">
                 <div>
                     <div class="flex items-center gap-3">
-                        <span class="text-2xl">{{ isPhotoProject ? '🖼️' : '🎬' }}</span>
+                        <svg v-if="isPhotoProject" xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-gray-400" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
                         <h2 class="text-3xl font-editorial tracking-tight text-gray-100">Project: {{ project.name }}</h2>
                         <span class="bg-[#1a1a1a] border border-white/5 px-2.5 py-1 rounded-sm text-[10px] font-mono-technical font-semibold uppercase tracking-wider flex items-center gap-1.5 text-gray-200">
                             <span :class="`w-1.5 h-1.5 rounded-full ${
@@ -379,7 +380,7 @@ onMounted(() => {
                                 </div>
 
                                 <div v-else class="bg-[#1c1b1b] aspect-video flex flex-col items-center justify-center p-8 text-gray-500 rounded-none">
-                                    <span class="text-4xl mb-3 opacity-30">🖼️</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mb-3 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                                     <h4 class="font-editorial text-lg font-bold text-gray-300">No photo drafts uploaded</h4>
                                     <p class="text-xs text-gray-400 font-mono-technical uppercase tracking-wider mt-2">Upload your first photo draft to get started.</p>
                                 </div>
@@ -396,7 +397,7 @@ onMounted(() => {
                                     </div>
                                 </div>
                                 <div v-else class="bg-[#1c1b1b] aspect-video flex flex-col items-center justify-center p-8 text-gray-500 rounded-none">
-                                    <span class="text-4xl mb-3 opacity-30">🎬</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mb-3 opacity-20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
                                     <h4 class="font-editorial text-lg font-bold text-gray-300">No video drafts uploaded</h4>
                                 </div>
                             </template>
@@ -525,9 +526,8 @@ onMounted(() => {
                                                 ✕
                                             </button>
 
-                                            <!-- Delete Button -->
                                             <button @click.stop="deleteComment(comment.id)" class="p-1.5 rounded-sm border bg-slate-950 border-white/5 text-gray-500 hover:text-rose-400 transition-all" title="Delete">
-                                                🗑️
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
                                             </button>
                                         </div>
                                     </div>
@@ -560,7 +560,10 @@ onMounted(() => {
                                :required="uploadFiles.length === 0" 
                                :disabled="uploadStatus === 'uploading'" />
                         <div class="space-y-2">
-                            <span class="text-4xl block">{{ isPhotoProject ? '🖼️' : '🎬' }}</span>
+                            <div class="flex justify-center">
+                                <svg v-if="isPhotoProject" xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-500 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-500 opacity-40" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                            </div>
                             <div class="text-sm text-gray-300 font-semibold font-mono-technical">
                                 {{ uploadFiles.length > 0 ? `${uploadFiles.length} file(s) selected` : isPhotoProject ? 'Click or drag photo(s)' : 'Click or drag video file' }}
                             </div>
