@@ -9,7 +9,7 @@ import { Link } from '@inertiajs/vue3';
     >
         <div class="mb-4">
         <Link href="/" class="block">
-                <img src="/RevisionRoomLogo.png" alt="RevisionRoom" class="h-10 w-auto" />
+                <img src="/RevisionRoomLogo.png" alt="RevisionRoom" class="h-11 w-auto" />
             </Link>
         </div>
 
