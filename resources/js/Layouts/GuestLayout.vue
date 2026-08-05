@@ -8,8 +8,8 @@ import { Link } from '@inertiajs/vue3';
         class="flex min-h-screen flex-col items-center bg-[#131313] pt-6 sm:justify-center sm:pt-0"
     >
         <div class="mb-4">
-            <Link href="/" class="text-4xl font-editorial font-bold text-accent tracking-tight select-none">
-                RevisionRoom
+        <Link href="/" class="block">
+                <img src="/RevisionRoomLogo.png" alt="RevisionRoom" class="h-10 w-auto" />
             </Link>
         </div>
 

@@ -25,10 +25,7 @@ const activeFeature = ref('sync');
                 
                 <!-- Logo -->
                 <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-md bg-accent flex items-center justify-center text-[#131313] font-black text-base">
-                        R
-                    </div>
-                    <span class="text-xl font-editorial font-bold text-gray-100 tracking-tight">RevisionRoom</span>
+                    <img src="/RevisionRoomLogo.png" alt="RevisionRoom" class="h-8 w-auto" />
                     <span class="text-[9px] font-mono-technical uppercase tracking-widest text-accent bg-accent/10 border border-accent/20 px-1.5 py-0.5 rounded-sm hidden sm:inline-block">VIDEO + PHOTO V2.0</span>
                 </div>
 
@@ -347,10 +344,7 @@ const activeFeature = ref('sync');
         <footer class="border-t border-white/5 py-16 px-6 bg-[#0f0e0e] text-xs text-gray-500 font-mono-technical">
             <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
                 <div class="flex items-center gap-3">
-                    <div class="w-7 h-7 rounded bg-accent flex items-center justify-center text-[#131313] font-black text-sm">
-                        R
-                    </div>
-                    <span class="text-lg font-editorial font-bold text-gray-100">RevisionRoom</span>
+                    <img src="/RevisionRoomLogo.png" alt="RevisionRoom" class="h-7 w-auto" />
                 </div>
                 <div class="text-gray-500 text-xs">
                     © 2026 RevisionRoom Inc. Video & Photo Client Review Platform.
